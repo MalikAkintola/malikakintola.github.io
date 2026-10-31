@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://malikakintola.malikola223.workers.dev/sitemap-index.xml
+Sitemap: https://malikakintola.com/sitemap-index.xml
