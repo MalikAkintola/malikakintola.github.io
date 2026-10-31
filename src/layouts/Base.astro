@@ -3,6 +3,8 @@ import '@fontsource-variable/literata/opsz.css';
 import '@fontsource-variable/literata/opsz-italic.css';
 import '../styles/global.css';
 import { getEntry } from 'astro:content';
+import { getImage } from 'astro:assets';
+import portrait from '../assets/malik-portrait.webp';
 
 interface Props {
   title: string;
@@ -13,16 +15,31 @@ const { title, description, image = '/og.jpg' } = Astro.props;
 const me = (await getEntry('profile', 'me'))!.data;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL(image, Astro.site);
-const person = {
+const photo = await getImage({ src: portrait, width: 800, format: 'jpg' });
+// Tells search engines who the site is about, what to call it, and which profiles are the same person.
+const structuredData = {
   '@context': 'https://schema.org',
-  '@type': 'Person',
-  name: me.name,
-  jobTitle: me.role,
-  email: `mailto:${me.email}`,
-  url: Astro.site?.href,
-  address: { '@type': 'PostalAddress', addressLocality: 'Lagos', addressCountry: 'NG' },
-  alumniOf: me.education.school,
-  sameAs: [me.linkedin, me.github, me.medium],
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${Astro.site?.href}#website`,
+      url: Astro.site?.href,
+      name: me.name,
+      about: { '@id': `${Astro.site?.href}#person` },
+    },
+    {
+      '@type': 'Person',
+      '@id': `${Astro.site?.href}#person`,
+      name: me.name,
+      jobTitle: me.role,
+      email: `mailto:${me.email}`,
+      url: Astro.site?.href,
+      image: new URL(photo.src, Astro.site).href,
+      address: { '@type': 'PostalAddress', addressLocality: 'Lagos', addressCountry: 'NG' },
+      alumniOf: me.education.school,
+      sameAs: [me.linkedin, me.twitter, me.github, me.medium],
+    },
+  ],
 };
 ---
 <!doctype html>
@@ -37,12 +54,13 @@ const person = {
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={me.name} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
     <meta name="twitter:card" content="summary_large_image" />
-    <script type="application/ld+json" set:html={JSON.stringify(person)} />
+    <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
     <script is:inline>document.documentElement.classList.add('js');</script>
     <slot name="head" />
   </head>

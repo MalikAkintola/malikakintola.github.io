@@ -19,6 +19,7 @@ const profile = defineCollection({
     linkedin: z.url(),
     github: z.url(),
     medium: z.url(),
+    twitter: z.url(),
     tagline: z.string().max(120),
     heroFact: z.string().max(140),
     bio: z.string(),
