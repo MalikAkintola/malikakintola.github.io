@@ -1,0 +1,56 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
+import Projects from '../components/Projects.astro';
+import About from '../components/About.astro';
+import Experience from '../components/Experience.astro';
+import Customers from '../components/Customers.astro';
+import Blog from '../components/Blog.astro';
+import Contact from '../components/Contact.astro';
+import Footer from '../components/Footer.astro';
+import { highlighted } from '../lib/blog';
+import closingPicture from '../assets/contact-bg.webp';
+
+const me = (await getEntry('profile', 'me'))!.data;
+const projects = (await getCollection('projects', (p) => !p.data.draft)).sort((a, b) => a.data.order - b.data.order);
+const roles = await getCollection('experience');
+const certifications = (await getCollection('certifications')).sort((a, b) => b.data.year - a.data.year);
+const writing = (await getCollection('writing')).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const current = roles.find((r) => r.data.end === 'present');
+const rfm = projects.find((p) => p.id === 'rfm-segmentation');
+
+const facts = [
+  { label: 'Based in', value: me.location },
+  { label: 'Degree', value: `${me.education.degree}, First Class, ${me.education.grade.match(/[\d.]+ \/ [\d.]+/)?.[0] ?? ''}` },
+  ...(current ? [{ label: 'Now', value: `${current.data.role}, ${current.data.org.replace(/\s*\(.*\)/, '')}` }] : []),
+];
+---
+<Base
+  title={`${me.name}, ${me.role.toLowerCase()} in Lagos`}
+  description={`${me.name} is an analytics engineer in Lagos who builds data pipelines and Power BI reporting. Microsoft certified on Fabric. Case studies, experience and résumé.`}
+>
+  <Hero name={me.name} role={me.role} tagline={me.tagline} email={me.email} linkedin={me.linkedin} />
+  <main id="main">
+    <Projects projects={projects.filter((p) => p.data.featured)} total={projects.length} />
+    <About bio={me.bio} facts={facts} certifications={certifications} />
+    <Experience roles={roles} />
+    <Customers article={rfm?.data.article} />
+    <Blog articles={highlighted(writing, me.featuredArticles)} projects={projects} total={writing.length} />
+  </main>
+
+  <!-- The closing band: a real picture under a dark, part-transparent layer, shared by contact and footer. -->
+  <div class="closing">
+    <Image class="closing__pic" src={closingPicture} alt="" widths={[960, 1600, 2400]} sizes="100vw" />
+    <Contact email={me.email} linkedin={me.linkedin} location={me.location} availability={me.availability} />
+    <Footer credit="Photograph: IBM punched-card storage, U.S. National Archives, public domain." />
+  </div>
+</Base>
+
+<style>
+  .closing { position: relative; isolation: isolate; overflow: hidden; background: #0a0a0a; }
+  .closing__pic { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; object-position: 50% 60%; }
+  .closing::before { content: ''; position: absolute; inset: 0; z-index: -1; background: rgba(10, 10, 10, 0.72); }
+  .closing :global(.band--ink) { --muted: #d6d6d6; background: transparent; }
+</style>

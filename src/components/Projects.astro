@@ -1,0 +1,90 @@
+---
+// Selected projects on the home page. The rail holds the heading; across the right, the reel (each
+// featured project's dashboard in turn, with the number it uncovered) and the ledger, then the way to
+// all of them. A project is featured by `featured: true` in its index.md.
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props { projects: CollectionEntry<'projects'>[]; total: number }
+const { projects, total } = Astro.props;
+---
+<section id="projects" class="band" aria-labelledby="projects-title">
+  <div class="grid">
+    <div class="rail">
+      <div class="rail__inner">
+        <h2 id="projects-title" class="head" data-reveal>Selected projects</h2>
+        <p data-reveal style="--i: 1">Three to start with. Each opens a full case study, with the live dashboard where one is published.</p>
+      </div>
+    </div>
+
+    <div class="content">
+      <figure class="reel" data-reel data-reveal aria-label="The finding behind each project">
+        <div class="reel__frame">
+          {projects.map((p, i) => (
+            <Image class:list={['reel__pic', i === 0 && 'is-on']} src={p.data.cover} alt={p.data.coverAlt} widths={[640, 960, 1280, 1600]} sizes="(max-width: 60em) calc(100vw - 2.5rem), 62vw" style={`object-position: ${p.data.coverPosition}`} data-reel-pic />
+          ))}
+        </div>
+        <figcaption class="reel__captions">
+          {projects.map((p, i) => (
+            <p class:list={['reel__caption', i === 0 && 'is-on']} data-reel-caption>
+              <span class="reel__finding nums">{p.data.finding}</span>
+              <span><a class="link" href={`/projects/${p.id}/`}>{p.data.title}</a>. {p.data.findingNote}</span>
+            </p>
+          ))}
+        </figcaption>
+      </figure>
+
+      <ul class="ledger">
+        {projects.map((p, i) => (
+          <li data-reveal style={`--i: ${i}`}>
+            <a class="ledger__link" href={`/projects/${p.id}/`}>
+              <span class="ledger__name">{p.data.title}</span>
+              <span class="ledger__kind">{p.data.discipline}</span>
+              <span class="ledger__finding nums">{p.data.finding}</span>
+              <span class="ledger__year nums">{p.data.year}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <p class="projects__all" data-reveal><a class="button button--ink" href="/projects/">See all {total} projects</a></p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .reel__frame { position: relative; aspect-ratio: 16 / 10; overflow: hidden; background: var(--surface); }
+  .reel__pic { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1600ms var(--ease-soft); }
+  .reel__pic.is-on { opacity: 1; }
+  .reel__captions { display: grid; margin-top: 1rem; }
+  .reel__caption { grid-area: 1 / 1; display: grid; grid-template-columns: 9rem 1fr; gap: 1rem; align-items: baseline; opacity: 0; visibility: hidden; transition: opacity 800ms ease, visibility 0s linear 800ms; }
+  .reel__caption.is-on { opacity: 1; visibility: visible; transition-delay: 0s; }
+  .reel__finding { font-size: var(--step-lead); font-weight: 600; white-space: nowrap; }
+
+  .ledger { margin-top: 3rem; }
+  .projects__all { margin-top: 2rem; }
+  .ledger__link {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1.3fr) minmax(0, 1fr) 3.5rem;
+    column-gap: 1.25rem;
+    align-items: baseline;
+    min-height: 2.875rem;
+    padding: 0.625rem 0.75rem;
+    margin-inline: -0.75rem;
+    text-decoration: none;
+    transition: background-color var(--t-hover) ease, color var(--t-hover) ease;
+  }
+  .ledger__name { font-weight: 500; }
+  .ledger__kind, .ledger__year { font-size: var(--step-small); color: var(--muted); }
+  .ledger__finding { font-weight: 600; }
+  .ledger__year { text-align: right; }
+  .ledger__link:hover, .ledger__link:focus-visible { background: var(--surface); }
+
+  @media (max-width: 48em) {
+    .reel__caption { grid-template-columns: 1fr; gap: 0.25rem; }
+    .ledger__link { grid-template-columns: 1fr auto; row-gap: 0.125rem; }
+    .ledger__name { grid-column: 1; }
+    .ledger__year { grid-column: 2; grid-row: 1; }
+    .ledger__kind { grid-column: 1; }
+    .ledger__finding { grid-column: 2; grid-row: 2; text-align: right; }
+  }
+</style>

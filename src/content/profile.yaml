@@ -1,0 +1,57 @@
+# Your details. Change the text after a colon and keep the two-space indentation.
+# Text that contains a colon followed by a space must be inside "double quotes".
+- id: me
+  name: Malik Akintola
+  role: Analytics Engineer
+  location: Lagos, Nigeria
+  availability: Available to work across time zones.
+  email: malikola223@gmail.com
+  # To print a phone number on the résumé, add a line `phone: "..."` here and set this to true.
+  # Everything in this file is public on GitHub, so the number is public as soon as it is saved here.
+  showPhoneOnResume: false
+  linkedin: https://www.linkedin.com/in/malik-akintola/
+  github: https://github.com/MalikAkintola
+  medium: https://medium.com/@malikola223
+
+  # One sentence under your name at the top of the home page (two lines at most).
+  tagline: I build data pipelines and the Power BI reports that sit on top of them.
+
+  # The smaller line under it.
+  heroFact: Microsoft certified Fabric data engineer and analytics engineer. First Class in Statistics, University of Lagos.
+
+  # The paragraph in the About section.
+  bio: >-
+    I trained as a statistician at the University of Lagos and graduated with First Class honours as the
+    best student in my department. Today I work in data analytics engineering at Remita, keeping the
+    pipelines behind payments reporting fast and correct.
+
+  # The three articles highlighted on the home page. Any words from the article's web address will do.
+  featuredArticles:
+    - understanding-your-customers-with-rfm
+    - stop-calculating-attrition-rate
+    - novacores-financial-journey
+
+  # The short profile at the top of the résumé.
+  resumeSummary: >-
+    Analytics engineer with three years of experience building data pipelines, data models and Power BI
+    reporting. Works in SQL and Python for transformation and pipeline development, and on Microsoft
+    Fabric from ingestion to report. First Class Statistics graduate, Microsoft certified Fabric data
+    engineer and analytics engineer, and an experienced data instructor.
+
+  education:
+    degree: BSc Statistics
+    school: University of Lagos
+    years: 2019 – 2024
+    grade: First Class Honours, CGPA 4.73 / 5.0
+    award: Best Graduating Student, Department of Statistics
+    coursework: Statistical Modelling, Probability and Decision Theory, Time Series Analysis, Regression Analysis, Operations Research
+
+  skills:
+    - group: Platforms
+      items: [Microsoft Fabric, Power BI, Excel (Power Query, PivotTables, VBA), Tableau, Google Analytics]
+    - group: Languages
+      items: [SQL (T-SQL, PostgreSQL, MySQL, Oracle), Python (pandas, NumPy, Matplotlib, Seaborn), DAX]
+    - group: Data engineering
+      items: [Azure Data Factory, dbt, Airbyte, Pentaho Data Integration]
+    - group: Warehousing
+      items: [Azure Synapse Analytics, Snowflake, SQL Server, BigQuery]

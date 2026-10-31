@@ -1,0 +1,33 @@
+# Certifications, newest first. "url" is the public verification link.
+# Names that contain a colon must stay inside "double quotes".
+
+- id: dp-700
+  name: "Microsoft Certified: Fabric Data Engineer Associate"
+  short: Fabric Data Engineer
+  issuer: Microsoft
+  code: DP-700
+  year: 2025
+  url: https://learn.microsoft.com/api/credentials/share/en-us/MalikAkintola/1A886830EC67AF2D?sharingId=2687F88E4D90A8B3
+
+- id: dp-600
+  name: "Microsoft Certified: Fabric Analytics Engineer Associate"
+  short: Fabric Analytics Engineer
+  issuer: Microsoft
+  code: DP-600
+  year: 2024
+  url: https://learn.microsoft.com/api/credentials/share/en-us/MalikAkintola/3AC6274EEC365D44?sharingId=2687F88E4D90A8B3
+
+- id: pl-300
+  name: "Microsoft Certified: Power BI Data Analyst Associate"
+  short: Power BI Data Analyst
+  issuer: Microsoft
+  code: PL-300
+  year: 2024
+  url: https://learn.microsoft.com/en-us/users/MalikAkintola/credentials/84ECB5C6A6C3112E
+
+- id: google-data-analytics
+  name: Google Data Analytics Professional Certificate
+  short: Google Data Analytics
+  issuer: Google, via Coursera
+  year: 2023
+  url: https://www.coursera.org/account/accomplishments/professional-cert/S7RCYQABWR35

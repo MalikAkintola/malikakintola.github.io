@@ -1,0 +1,70 @@
+---
+// Every project. Each is its own band: a large picture on one side, the finding and the way into the case
+// study on the other, swapping sides down the page.
+import { getCollection, getEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import SiteNav from '../../components/SiteNav.astro';
+import Footer from '../../components/Footer.astro';
+
+const me = (await getEntry('profile', 'me'))!.data;
+const projects = (await getCollection('projects', (p) => !p.data.draft)).sort((a, b) => a.data.order - b.data.order);
+---
+<Base title={`Projects, ${me.name}`} description={`Data engineering, financial analysis, risk analytics and BI development projects by ${me.name}, each with a full case study.`}>
+  <SiteNav />
+  <main id="main">
+    <header class="grid page-head">
+      <h1 class="display page-head__title" data-reveal>Projects</h1>
+      <p class="lead page-head__side" data-reveal style="--i: 1">
+        Data pipelines, financial analysis, risk models and reports. Open any project for the full case study,
+        with the live dashboard where one is published.
+      </p>
+    </header>
+
+    {projects.map((p, i) => (
+      <article class:list={['band', 'project', i % 2 === 0 && 'band--grey', i % 2 === 1 && 'project--flip']}>
+        <div class="grid project__grid">
+          <a class="project__pic" href={`/projects/${p.id}/`} tabindex="-1" aria-hidden="true" data-reveal>
+            <Image src={p.data.cover} alt="" widths={[640, 960, 1280, 1600]} sizes="(max-width: 60em) calc(100vw - 2.5rem), 58vw" loading={i === 0 ? 'eager' : 'lazy'} style={`object-position: ${p.data.coverPosition}`} />
+          </a>
+          <div class="project__text" data-reveal style="--i: 1">
+            <h2 class="head"><a class="project__link" href={`/projects/${p.id}/`}>{p.data.title}</a></h2>
+            <p class="project__finding nums">{p.data.finding}</p>
+            <p>{p.data.findingNote}</p>
+            <p class="small muted">{p.data.discipline}, {p.data.year}. {p.data.tools.slice(0, 4).join(', ')}.</p>
+            <a class="project__more" href={`/projects/${p.id}/`} aria-label={`Read the case study: ${p.data.title}`}>Read the case study</a>
+          </div>
+        </div>
+      </article>
+    ))}
+  </main>
+  <Footer />
+</Base>
+
+<style>
+  .page-head { padding-block: clamp(3rem, 7vh, 5rem) clamp(2.5rem, 5vh, 4rem); align-items: end; }
+  .page-head__title { grid-column: 1 / span 6; }
+  .page-head__side { grid-column: 7 / -1; }
+
+  .project { padding-block: clamp(3.5rem, 6vw, 5.5rem); }
+  .project__grid { align-items: center; }
+  .project__pic { display: block; grid-column: 1 / span 7; aspect-ratio: 16 / 10; overflow: hidden; background: var(--surface); }
+  .project__pic img { width: 100%; height: 100%; object-fit: cover; transition: transform 700ms var(--ease-soft); }
+  .project__text { grid-column: 9 / -1; display: grid; gap: 0.875rem; }
+  .project--flip .project__pic { grid-column: 6 / -1; grid-row: 1; }
+  .project--flip .project__text { grid-column: 1 / span 4; grid-row: 1; }
+  .project__link { text-decoration: none; }
+  .project__finding { font-size: var(--step-lead); font-weight: 600; }
+  .project__more { justify-self: start; font-weight: 600; text-decoration: underline; text-decoration-thickness: 0.06em; text-underline-offset: 0.2em; text-decoration-color: color-mix(in srgb, currentColor 35%, transparent); transition: text-decoration-color var(--t-hover) ease; }
+  @media (hover: hover) and (pointer: fine) {
+    .project__pic:hover img { transform: scale(1.02); }
+    .project__link:hover { text-decoration: underline; text-decoration-thickness: 0.05em; text-underline-offset: 0.16em; }
+    .project__more:hover { text-decoration-color: currentColor; }
+  }
+  @media (max-width: 60em) {
+    .page-head__title, .page-head__side { grid-column: 1 / -1; }
+    .page-head__side { margin-top: 1.25rem; }
+    .project__pic, .project--flip .project__pic { grid-column: 1 / -1; grid-row: auto; }
+    .project__text, .project--flip .project__text { grid-column: 1 / -1; grid-row: auto; margin-top: 1.5rem; }
+  }
+</style>

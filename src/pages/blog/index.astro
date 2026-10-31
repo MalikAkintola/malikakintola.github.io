@@ -1,0 +1,44 @@
+---
+// Every article from Medium, newest first. The list updates itself at each build.
+import { getCollection, getEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import SiteNav from '../../components/SiteNav.astro';
+import ArticleRow from '../../components/ArticleRow.astro';
+import Footer from '../../components/Footer.astro';
+
+const me = (await getEntry('profile', 'me'))!.data;
+const projects = await getCollection('projects', (p) => !p.data.draft);
+const writing = (await getCollection('writing')).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+<Base title={`Blog, ${me.name}`} description={`Articles by ${me.name} on Power BI, DAX and data analysis, including RFM segmentation and attrition rates.`}>
+  <SiteNav />
+  <main id="main">
+    <header class="grid page-head">
+      <h1 class="display page-head__title" data-reveal>Blog</h1>
+      <div class="page-head__side" data-reveal style="--i: 1">
+        <p class="lead">How I work through analysis problems in Power BI and DAX, written so you can try them yourself.</p>
+        <p><a class="link" href={me.medium} rel="noopener" target="_blank">Follow me on Medium</a></p>
+      </div>
+    </header>
+    {writing.map((article, i) => (
+      <section class:list={['band', 'blog-item', i % 2 === 0 && 'band--grey']} aria-label={article.data.title}>
+        <div class="grid">
+          <div class="blog-item__row"><ArticleRow article={article} projects={projects} large /></div>
+        </div>
+      </section>
+    ))}
+  </main>
+  <Footer />
+</Base>
+
+<style>
+  .page-head { padding-block: clamp(3rem, 7vh, 5rem) clamp(2rem, 4vh, 3rem); align-items: end; }
+  .page-head__title { grid-column: 1 / span 6; }
+  .page-head__side { grid-column: 7 / -1; display: grid; gap: 1rem; }
+  .blog-item { padding-block: clamp(3rem, 5vw, 4.5rem); }
+  .blog-item__row { grid-column: 1 / -1; }
+  @media (max-width: 60em) {
+    .page-head__title, .page-head__side { grid-column: 1 / -1; }
+    .page-head__side { margin-top: 1.25rem; }
+  }
+</style>

@@ -1,0 +1,50 @@
+---
+// One article: its picture, title, first lines and date. Used on the home page and on /blog/.
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { articlePicture, monthYear } from '../lib/blog';
+
+interface Props {
+  article: CollectionEntry<'writing'>;
+  projects: CollectionEntry<'projects'>[];
+  index?: number;
+  large?: boolean;
+}
+const { article, projects, index = 0, large = false } = Astro.props;
+const a = article.data;
+const picture = articlePicture(article, projects);
+---
+<article class:list={['article', !picture && 'article--plain', large && 'article--large']} data-reveal style={`--i: ${index}`}>
+  {picture && (
+    <div class="article__pic">
+      <Image src={picture.src} alt="" widths={[320, 480, 640, 800]} sizes={large ? '(max-width: 48em) calc(100vw - 2.5rem), 42vw' : '(max-width: 48em) calc(100vw - 2.5rem), 26vw'} style={`object-position: ${picture.position}`} />
+    </div>
+  )}
+  <div class="article__text">
+    <h3 class="article__title"><a class="article__link" href={a.url} rel="noopener" target="_blank">{a.title}</a></h3>
+    {a.excerpt && <p class="article__excerpt">{a.excerpt}</p>}
+    <p class="small muted nums">{monthYear(a.date)}, on Medium</p>
+  </div>
+</article>
+
+<style>
+  .article { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: clamp(1.25rem, 2.5vw, 2.5rem); align-items: start; }
+  .article--plain { grid-template-columns: 1fr; }
+  .article--large { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); align-items: center; gap: clamp(1.5rem, 4vw, 4rem); }
+  .article--large .article__text { gap: 0.875rem; }
+  .article__pic { aspect-ratio: 16 / 10; overflow: hidden; background: var(--surface); }
+  .article__pic img { width: 100%; height: 100%; object-fit: cover; transition: transform 700ms var(--ease-soft); }
+  .article__text { display: grid; gap: 0.625rem; }
+  .article__title { font-size: var(--step-lead); font-weight: 500; letter-spacing: -0.01em; line-height: 1.25; }
+  .article__link { text-decoration: none; }
+  .article__link::after { content: ''; position: absolute; inset: 0; }
+  .article__link:focus-visible { outline: none; }
+  .article:has(.article__link:focus-visible) { outline: 2px solid var(--accent); outline-offset: 4px; }
+  @media (hover: hover) and (pointer: fine) {
+    .article:hover .article__title { text-decoration: underline; text-decoration-thickness: 0.05em; text-underline-offset: 0.18em; }
+    .article:hover .article__pic img { transform: scale(1.03); }
+  }
+  @media (max-width: 40em) {
+    .article { grid-template-columns: 1fr; }
+  }
+</style>

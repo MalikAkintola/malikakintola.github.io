@@ -1,0 +1,27 @@
+---
+// The plain bar on inner pages: name, the four destinations, one action.
+import { getEntry } from 'astro:content';
+const me = (await getEntry('profile', 'me'))!.data;
+const path = Astro.url.pathname;
+---
+<nav class="nav" aria-label="Main">
+  <a class="nav__mark" href="/">{me.name}</a>
+  <div class="nav__links">
+    <a class="link" href="/projects/" aria-current={path.startsWith('/projects') ? 'page' : undefined}>Projects</a>
+    <a class="link" href="/blog/" aria-current={path.startsWith('/blog') ? 'page' : undefined}>Blog</a>
+    <a class="link" href={me.linkedin} rel="noopener" target="_blank">LinkedIn</a>
+    <a class="link" href="/resume/" aria-current={path.startsWith('/resume') ? 'page' : undefined}>Résumé</a>
+  </div>
+  <a class="button nav__action" href={`mailto:${me.email}?subject=Hello%20Malik`}>Email me</a>
+</nav>
+
+<style>
+  .nav { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1.5rem; padding: 1.5rem var(--margin); font-size: var(--step-small); }
+  .nav__mark { font-weight: 600; text-decoration: none; font-size: var(--step-body); margin-right: auto; }
+  .nav__links { display: flex; align-items: center; gap: 1.5rem; }
+  .nav__links [aria-current] { font-weight: 600; text-decoration-color: currentColor; }
+  @media (max-width: 40em) {
+    .nav__mark { flex: 1; }
+    .nav__links { order: 3; width: 100%; justify-content: space-between; gap: 1rem; }
+  }
+</style>

@@ -1,0 +1,10 @@
+Vendored copy of the "design-taste-frontend" skill (tasteskill v2.1.5).
+
+Source:  https://github.com/Leonxlnx/taste-skill  (folder skills/taste-skill)
+Commit:  12af471f627f866411b4bd785b19646d3672784c  (2026-10-25)
+License: MIT, see LICENSE in this folder
+Pinned:  2026-10-29, after a security review of that commit
+
+This copy does not track upstream. To update, review the diff between the
+commit above and the new one before replacing this folder:
+  https://github.com/Leonxlnx/taste-skill/compare/12af471...main

@@ -1,0 +1,108 @@
+/* Malik Akintola portfolio, design B. Direction: the quiet instrument (tasteskill, seed 862661861).
+   Palette "Signal red, white", one family: Literata. Built on tasteskill's base.css. */
+
+:root {
+  --bg: #ffffff;
+  --surface: #f2f2f2;
+  --surface-2: #e6e6e6;
+  --ink: #0a0a0a;
+  --muted: #5f5f5f;
+  --accent: #d92b21;
+  --accent-ink: #ffffff;
+
+  --font: 'Literata Variable', Georgia, serif;
+
+  /* five sizes: small, body, lead, head, display */
+  --step-small: clamp(0.875rem, 0.85rem + 0.1vw, 0.9375rem);
+  --step-body: clamp(1.0625rem, 1.02rem + 0.2vw, 1.1875rem);
+  --step-lead: clamp(1.25rem, 1.15rem + 0.45vw, 1.5rem);
+  --step-head: clamp(1.75rem, 1.4rem + 1.4vw, 2.5rem);
+  --step-display: clamp(2.25rem, 1.5rem + 3.2vw, 4.25rem);
+
+  /* the column: 560px wide and centred; the page's equal margins hold everything else */
+  --margin: clamp(1.25rem, 2.8vw, 2.5rem);
+  --col: min(35rem, 100vw - 2 * var(--margin));
+  --edge: calc((100vw - var(--col)) / 2);
+  --wide: min(100vw - 2 * var(--margin), 70rem);
+  --space: clamp(6rem, 9vw, 8.75rem);
+  --radius: 0px;
+  --gutter: clamp(1rem, 2.2vw, 2rem);
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);
+  --ease-soft: cubic-bezier(0.33, 1, 0.68, 1);
+  --t-press: 140ms;
+  --t-hover: 180ms;
+  --t-ui: 240ms;
+}
+
+/* ---------- reset ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; color-scheme: light; background: var(--bg); }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: var(--step-body); line-height: 1.6; font-optical-sizing: auto; font-kerning: normal; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; overflow-x: clip; }
+h1, h2, h3, h4, p, figure, blockquote, ul, ol, dl, dd { margin: 0; }
+ul[class], ol[class] { padding: 0; list-style: none; }
+img, video, svg, canvas, iframe { display: block; max-width: 100%; }
+img, video { height: auto; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { background: none; border: 0; padding: 0; cursor: pointer; }
+a { color: inherit; }
+:target { scroll-margin-top: 2rem; }
+::selection { background: var(--ink); color: var(--bg); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* ---------- type ---------- */
+h1, h2, h3 { font-weight: 500; letter-spacing: -0.02em; line-height: 1.15; text-wrap: balance; }
+.display { font-size: var(--step-display); font-weight: 500; letter-spacing: -0.02em; line-height: 1.05; }
+.head { font-size: var(--step-head); }
+.lead { font-size: var(--step-lead); line-height: 1.45; }
+.small { font-size: var(--step-small); line-height: 1.5; }
+.muted { color: var(--muted); }
+.strong { font-weight: 600; }
+p { max-width: 62ch; text-wrap: pretty; }
+.nums { font-variant-numeric: tabular-nums lining-nums; }
+
+/* ---------- layout: everything hangs from the column's left edge ---------- */
+.col { margin-left: var(--edge); width: var(--col); }
+.wrap { padding-inline: var(--margin); }
+.section { padding-top: var(--space); }
+
+/* bands: every section is its own band of tone, so the page reads in clear chapters */
+.band { padding-block: var(--space); background: var(--bg); color: var(--ink); }
+.band--grey { --bg: #f4f4f3; --surface: #e9e9e7; --surface-2: #dcdcda; background: var(--bg); }
+.band--ink { --bg: #0a0a0a; --ink: #ffffff; --muted: #a8a8a8; --surface: #1a1a1a; --surface-2: #2a2a2a; background: var(--bg); color: var(--ink); }
+
+/* the page grid: a rail for the section's heading on the left, the content across the right */
+.grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gutter); width: min(100% - 2 * var(--margin), 100rem); margin-inline: auto; }
+.rail { grid-column: 1 / span 4; }
+.rail__inner { position: sticky; top: 3rem; display: grid; gap: 1.25rem; padding-right: 2rem; }
+.content { grid-column: 5 / -1; min-width: 0; }
+@media (max-width: 60em) {
+  .rail, .content { grid-column: 1 / -1; }
+  .rail__inner { position: static; padding-right: 0; margin-bottom: 2.5rem; }
+}
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.skip { position: absolute; left: var(--margin); top: -4rem; z-index: 50; padding: 0.75rem 1rem; background: var(--ink); color: var(--bg); text-decoration: none; }
+.skip:focus { top: var(--margin); }
+
+/* ---------- controls ---------- */
+.button { display: inline-flex; align-items: center; justify-content: center; min-height: 2.875rem; padding: 0 1.25rem; background: var(--accent); color: var(--accent-ink); border-radius: var(--radius); text-decoration: none; font-weight: 600; font-size: var(--step-small); white-space: nowrap; transition: transform var(--t-press) var(--ease-out), background-color var(--t-hover) ease; }
+.button:active { transform: scale(0.97); }
+.button--ink { background: var(--ink); color: var(--bg); }
+.link { text-decoration: underline; text-decoration-thickness: 0.06em; text-underline-offset: 0.2em; text-decoration-color: color-mix(in srgb, currentColor 35%, transparent); transition: text-decoration-color var(--t-hover) ease; }
+@media (hover: hover) and (pointer: fine) {
+  .link:hover { text-decoration-color: currentColor; }
+  .button:hover { background: #b8231b; }
+}
+
+/* ---------- page-to-page transitions ---------- */
+@view-transition { navigation: auto; }
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+}
+
+/* ---------- motion helpers (content stays visible without JavaScript) ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  .js [data-reveal] { opacity: 0; transform: translateY(18px); transition: opacity 700ms var(--ease-out), transform 900ms var(--ease-out); transition-delay: calc(var(--i, 0) * 70ms); }
+  .js [data-reveal].is-in { opacity: 1; transform: none; }
+}

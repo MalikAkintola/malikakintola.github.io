@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro';
+import SiteNav from '../components/SiteNav.astro';
+---
+<Base title="Page not found, Malik Akintola" description="This page does not exist.">
+  <SiteNav />
+  <main id="main" class="missing wrap">
+    <h1 class="display">Not found</h1>
+    <p class="lead">This page does not exist, or it moved when the site was rebuilt.</p>
+    <a class="button" href="/">Go to the home page</a>
+  </main>
+</Base>
+
+<style>
+  .missing { min-height: 80svh; display: grid; align-content: center; gap: 2rem; justify-items: start; }
+  .missing { padding-left: var(--edge); }
+</style>

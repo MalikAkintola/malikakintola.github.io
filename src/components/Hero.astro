@@ -1,0 +1,139 @@
+---
+// Hero: "Control that reads the page". Two halves by tone. Left: name, line and action, anchored low.
+// Right: a small working instrument that measures this visit as it happens, in the visitor's browser.
+import { Image } from 'astro:assets';
+import portrait from '../assets/malik-portrait.webp';
+import { nb } from '../lib/text';
+
+interface Props { name: string; role: string; tagline: string; email: string; linkedin: string }
+const { name, role, tagline, email, linkedin } = Astro.props;
+---
+<header class="hero">
+  <div class="hero__left">
+    <figure class="hero__portrait">
+      <Image src={portrait} alt={`Portrait of ${name}`} widths={[320, 480, 640, 800]} sizes="(max-width: 60em) 40vw, 20vw" loading="eager" fetchpriority="high" />
+    </figure>
+    <div class="hero__copy">
+      <h1 class="display hero__in">{name},<br /> {role.toLowerCase()}</h1>
+      <p class="hero__line hero__in" style="--i: 1">{nb(tagline)}</p>
+      <div class="hero__actions hero__in" style="--i: 2">
+        <a class="button" href={`mailto:${email}?subject=Hello%20Malik`}>Email me</a>
+        <a class="link" href="#projects">See my projects</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero__right">
+    <nav class="hero__nav" aria-label="Main">
+      <a class="link" href="/projects/">Projects</a>
+      <a class="link" href="/blog/">Blog</a>
+      <a class="link" href={linkedin} rel="noopener" target="_blank">LinkedIn</a>
+      <a class="link" href="/resume/">Résumé</a>
+    </nav>
+    <figure class="visit" data-ui data-visit aria-labelledby="visit-title">
+      <figcaption class="visit__head">
+        <span id="visit-title" class="visit__title">This visit, measured live</span>
+        <span class="visit__live" aria-hidden="true">Live</span>
+      </figcaption>
+      <div class="visit__chart" aria-hidden="true">
+        <span class="visit__y visit__y--top">100%</span>
+        <span class="visit__y visit__y--bottom">0%</span>
+        <svg viewBox="0 0 300 96" preserveAspectRatio="none">
+          <polyline class="visit__area" points="0,96 300,96" data-visit-area />
+          <polyline class="visit__line" points="0,96 300,96" data-visit-line />
+        </svg>
+        <span class="visit__axis">How far down the page you are, over the last minute</span>
+      </div>
+      <dl class="visit__kpis">
+        <div class="visit__time"><dt>Time here</dt><dd class="nums" data-m="time">0 sec</dd></div>
+        <div><dt>Furthest scrolled</dt><dd class="nums" data-m="depth">0%</dd></div>
+        <div><dt>Sections seen</dt><dd class="nums" data-m="seen">0 of 6</dd></div>
+        <div><dt>Your screen</dt><dd class="nums" data-m="screen">–</dd></div>
+      </dl>
+      <p class="visit__note">Counted in your browser. Nothing is sent anywhere.</p>
+    </figure>
+  </div>
+</header>
+
+<style>
+  .hero {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 100svh;
+  }
+  .hero__left {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 3rem;
+    padding: 2.5rem var(--margin) 2.5rem 2.5rem;
+    background: var(--bg);
+  }
+  .hero__portrait { align-self: flex-start; height: min(42svh, 26rem); aspect-ratio: 4 / 5; overflow: hidden; background: var(--surface); }
+  .hero__portrait img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%; filter: grayscale(1) contrast(1.05); }
+  .hero__copy { display: grid; gap: 1.5rem; }
+  .hero__line { max-width: 34ch; }
+  .hero__actions { display: flex; align-items: center; gap: 1.5rem; margin-top: 0.5rem; }
+
+  .hero__right {
+    position: relative;
+    display: grid;
+    place-items: center;
+    padding: 5rem 2.5rem 2.5rem;
+    background: var(--surface);
+    justify-items: end;
+  }
+  .hero__nav { position: absolute; top: 2.5rem; right: 2.5rem; display: flex; gap: 1.5rem; }
+
+  /* the instrument: a real interface fragment, so it keeps its own borders */
+  .visit {
+    width: 100%;
+    max-width: 40rem;
+    padding: 1.5rem 1.5rem 1.25rem;
+    background: var(--bg);
+    font-size: 0.875rem;
+    line-height: 1.4;
+  }
+  .visit__head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+  .visit__title { font-weight: 600; font-size: 0.9375rem; }
+  .visit__live { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--muted); }
+  .visit__live::before { content: ''; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--ink); animation: visit-pulse 2s ease-in-out infinite; }
+  @keyframes visit-pulse { 50% { opacity: 0.25; } }
+  .visit__chart { position: relative; margin-top: 1rem; padding-left: 2.5rem; }
+  .visit__y { position: absolute; left: 0; color: var(--muted); font-size: 0.8125rem; }
+  .visit__y--top { top: -0.4rem; }
+  .visit__y--bottom { top: calc(8rem - 0.9rem); }
+  .visit__chart svg { background: var(--surface); }
+  .visit__chart svg { width: 100%; height: 8rem; overflow: visible; }
+  .visit__line { fill: none; stroke: var(--ink); stroke-width: 2; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+  .visit__area { fill: var(--surface); stroke: none; }
+  .visit__axis { display: block; margin-top: 0.5rem; color: var(--muted); text-align: right; }
+  .visit__kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; margin-top: 1rem; }
+  .visit__kpis > div { padding: 0.75rem 0.875rem; background: var(--surface); }
+  .visit__time { grid-column: 1 / -1; }
+  .visit__kpis dt { color: var(--muted); }
+  .visit__kpis dd { margin-top: 0.25rem; font-size: 1.75rem; font-weight: 500; letter-spacing: -0.01em; line-height: 1.1; }
+  .visit__note { margin-top: 0.875rem; color: var(--muted); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .js .hero__in { animation: hero-in 900ms var(--ease-out) both; animation-delay: calc(150ms + var(--i, 0) * 110ms); }
+  }
+  @keyframes hero-in { from { opacity: 0; transform: translateY(16px); } }
+  @media (prefers-reduced-motion: reduce) {
+    .visit__live::before { animation: none; }
+  }
+
+  @media (max-width: 60em) {
+    .hero { grid-template-columns: 1fr; min-height: 0; }
+    .hero__right { position: static; min-height: 0; padding: 2.5rem var(--margin) 3rem; justify-items: stretch; }
+    .visit { max-width: none; }
+    .hero__nav { top: 1.25rem; left: var(--margin); right: var(--margin); justify-content: space-between; gap: 1rem; }
+    .visit__kpis { grid-template-columns: 1fr 1fr; }
+    .visit__kpis > div:last-child { grid-column: 1 / -1; }
+    .hero__portrait { height: auto; width: min(11rem, 40vw); margin-bottom: 0.5rem; }
+    .hero__left { justify-content: flex-start; }
+    .hero__left { padding: 4.25rem var(--margin) 3rem; gap: 1.25rem; }
+    .hero__copy { gap: 1.25rem; }
+  }
+</style>

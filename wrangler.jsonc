@@ -1,0 +1,10 @@
+// Cloudflare deploy settings. The site is plain static files from `npm run build` in ./dist.
+{
+  "name": "malikakintola",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash"
+  }
+}

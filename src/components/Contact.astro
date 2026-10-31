@@ -1,0 +1,53 @@
+---
+// Contact, in the closing band with the footer line (the picture and its dark layer are set by the page).
+// The rail holds the heading, where he is and how he works; the right holds the invitation and the ways
+// to reach him.
+import { nb } from '../lib/text';
+
+interface Props { email: string; linkedin: string; location: string; availability: string }
+const { email, linkedin, location, availability } = Astro.props;
+---
+<section id="contact" class="band band--ink contact" aria-labelledby="contact-title">
+  <div class="grid">
+    <div class="rail">
+      <div class="rail__inner">
+        <h2 id="contact-title" class="head" data-reveal>Contact</h2>
+        <p data-reveal style="--i: 1">{location}. {availability}</p>
+      </div>
+    </div>
+    <div class="content">
+      <p class="contact__statement lead" data-reveal>{nb('Hiring for a data role, or need a pipeline or a Power BI report built? I would like to hear about it.')}</p>
+      <div class="contact__links" data-reveal style="--i: 1">
+        <a class="contact__email" href={`mailto:${email}?subject=Hello%20Malik`}>{email}</a>
+        <div class="contact__more">
+          <a class="button" href={`mailto:${email}?subject=Hello%20Malik`}>Email me</a>
+          <a class="link" href={linkedin} rel="noopener" target="_blank">LinkedIn</a>
+          <a class="link" href="/resume/">Résumé</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .contact { padding-bottom: 2rem; }
+  .contact .rail__inner { position: static; }
+  .contact__statement { max-width: 32ch; }
+  .contact__links { display: grid; gap: 2rem; margin-top: 3rem; justify-items: start; }
+  .contact__email {
+    font-size: var(--step-head);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    text-decoration: underline;
+    text-decoration-thickness: 0.04em;
+    text-underline-offset: 0.18em;
+    text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+    overflow-wrap: anywhere;
+    transition: text-decoration-color var(--t-hover) ease;
+  }
+  .contact__more { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.75rem; }
+  @media (hover: hover) and (pointer: fine) {
+    .contact__email:hover { text-decoration-color: currentColor; }
+  }
+</style>

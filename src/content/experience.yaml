@@ -1,0 +1,92 @@
+# Jobs, teaching and volunteering. The newest goes first.
+# To add a role: copy one block (from "- id:" down to its last point), paste it at the top and edit it.
+#   id     a short unique name, lower case, no spaces
+#   kind   work or volunteer
+#   start  year and month, for example 2025-07
+#   end    year and month, or present
+#   points one line each, starting with "- "
+
+- id: remita
+  role: Data Analytics Engineer
+  org: Remita Payment Services (SystemSpecs)
+  kind: work
+  start: 2025-07
+  end: present
+  location: Lagos
+  points:
+    - Build and maintain SQL and Python pipelines that ingest, transform and model data from several source systems for reporting.
+    - Find and fix data quality gaps across those systems, so payments and operations reporting can be trusted.
+    - Tune queries and pipeline performance, manage access controls, and help monitor and debug production data processes.
+    - Turn reporting needs from the BI and analytics teams into technical specifications for the data platform.
+
+- id: standtech
+  role: Data Analyst
+  org: Standtech Digital Solutions
+  kind: work
+  start: 2025-11
+  end: 2026-04
+  points:
+    - Diagnosed performance bottlenecks in the company’s data layer and fixed them, making the application faster for its users.
+    - Worked with the product team to define analytical requirements and deliver insights that set product priorities.
+
+- id: qucoon
+  role: Data Analyst
+  org: Qucoon
+  kind: work
+  start: 2025-01
+  end: 2025-04
+  points:
+    - Segmented a microfinance bank’s customers by churn risk from demographic and transactional data, using RFM analysis and risk profiling. The recommendations shaped its retention campaign.
+    - Built Power BI dashboards tracking cash inflows and outflows in real time, so the operations team could spot at-risk customers early.
+    - Traced recurring downtime on a client’s digital platform through its QA data, cutting incidents by 30%.
+
+- id: hagital
+  role: Data Analyst Instructor
+  org: Hagital Consulting
+  kind: work
+  start: 2024-01
+  end: 2025-01
+  location: Remote
+  points:
+    - Taught Excel, Power BI, SQL and Python to more than 600 learners, with the curriculum built around industry use cases.
+    - Built and automated Power BI and Google Sheets dashboards for learner performance and participation.
+    - Built a learner tracking and feedback system that cut manual admin work by 40%.
+
+- id: nithub
+  role: Data Analyst Intern
+  org: NITHUB
+  kind: work
+  start: 2023-04
+  end: 2023-12
+  points:
+    - Built automated pipelines in Python and Power Query for pricing and market research.
+    - Modelled relational data into analysis-ready tables for internal teams.
+    - Built Power BI dashboards to monitor food price trends, cutting repeated analysis work by 55%.
+
+- id: investment-society
+  role: Data Analytics Instructor
+  org: The Investment Society, University of Lagos
+  kind: volunteer
+  start: 2024-05
+  end: 2024-06
+  points:
+    - Ran a multi-session analytics course for members, framing data concepts in the language of investment research.
+
+- id: career-expo
+  role: Data Analytics Track Lead
+  org: Engineering Career Expo
+  kind: volunteer
+  start: 2023-10
+  end: 2024-08
+  points:
+    - Led a team of three running the Data and Analytics track for the whole programme.
+    - Wrote all the Power BI teaching materials and taught 20+ students over eight weeks, with more than 80% completing.
+
+- id: dsn
+  role: Power BI Instructor
+  org: DSN AI Invasion
+  kind: volunteer
+  start: 2023-07
+  end: 2023-07
+  points:
+    - Wrote the syllabus and materials, lectured, and graded coursework. 85% of the class completed the course.

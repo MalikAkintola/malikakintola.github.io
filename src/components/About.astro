@@ -1,0 +1,60 @@
+---
+// About, on a grey band. The rail holds the heading and the facts; across the right, the paragraph and
+// the certifications side by side.
+import type { CollectionEntry } from 'astro:content';
+import { nb } from '../lib/text';
+
+interface Props {
+  bio: string;
+  facts: { label: string; value: string }[];
+  certifications: CollectionEntry<'certifications'>[];
+}
+const { bio, facts, certifications } = Astro.props;
+---
+<section id="about" class="band band--grey" aria-labelledby="about-title">
+  <div class="grid">
+    <div class="rail">
+      <div class="rail__inner">
+        <h2 id="about-title" class="head" data-reveal>About</h2>
+        <dl class="about__facts">
+          {facts.map((f, i) => (
+            <div data-reveal style={`--i: ${i + 1}`}>
+              <dt class="small muted">{f.label}</dt>
+              <dd>{f.value}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </div>
+
+    <div class="content about__body">
+      <p class="about__bio lead" data-reveal>{nb(bio)}</p>
+      <div data-reveal style="--i: 1">
+        <h3 class="about__list-title">Certified</h3>
+        <ul class="about__list">
+          {certifications.map((c) => (
+            <li>
+              <a class="link" href={c.data.url} rel="noopener" target="_blank">
+                {c.data.code ? `${c.data.code}, ` : ''}{c.data.short}<span class="sr-only"> (verify on {c.data.issuer}, opens in a new tab)</span>
+              </a>
+              <span class="muted nums">{c.data.year}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .about__facts { display: grid; gap: 1rem; margin-top: 0.75rem; }
+  .about__facts dd { margin-top: 0.125rem; font-weight: 600; }
+  .about__body { display: grid; grid-template-columns: 1.15fr 1fr; gap: 3rem clamp(2.5rem, 5vw, 5rem); align-items: start; }
+  .about__list-title { font-size: var(--step-body); font-weight: 600; letter-spacing: 0; margin-bottom: 0.75rem; }
+  .about__list { display: grid; gap: 0.625rem; }
+  .about__list li { display: flex; justify-content: space-between; align-items: baseline; gap: 1.5rem; }
+  @media (max-width: 60em) {
+    .about__facts { grid-template-columns: 1fr 1fr; }
+    .about__body { grid-template-columns: 1fr; }
+  }
+</style>

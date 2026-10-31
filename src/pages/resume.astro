@@ -1,0 +1,160 @@
+---
+// The résumé, built from the same files as the site (profile.yaml, experience.yaml,
+// certifications.yaml and the projects). It prints to A4, and `npm run resume:pdf` saves it as
+// public/resume.pdf.
+import { getCollection, getEntry } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import SiteNav from '../components/SiteNav.astro';
+import { span } from '../lib/dates';
+
+const me = (await getEntry('profile', 'me'))!.data;
+const roles = await getCollection('experience');
+const work = roles.filter((r) => r.data.kind === 'work');
+const volunteer = roles.filter((r) => r.data.kind === 'volunteer');
+const certs = (await getCollection('certifications')).sort((a, b) => b.data.year - a.data.year);
+const projects = (await getCollection('projects', (p) => !p.data.draft)).sort((a, b) => a.data.order - b.data.order).slice(0, 4);
+const site = Astro.site!.href.replace(/^https?:\/\//, '').replace(/\/$/, '');
+const strip = (u: string) => u.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+const endKey = (e: string) => (e === 'present' ? '9999-99' : e);
+const byRecent = (a: (typeof roles)[number], b: (typeof roles)[number]) => endKey(b.data.end).localeCompare(endKey(a.data.end)) || b.data.start.localeCompare(a.data.start);
+work.sort(byRecent);
+volunteer.sort(byRecent);
+---
+<Base title={`Résumé, ${me.name}`} description={`Résumé of ${me.name}, ${me.role.toLowerCase()} in ${me.location}.`}>
+  <div class="no-print"><SiteNav /></div>
+  <main id="main" class="resume-page light">
+    <div class="resume-tools wrap no-print">
+      <div>
+        <h1 class="head">Résumé</h1>
+        <p class="resume-tools__lead lead">{me.name}, {me.role.toLowerCase()} in {me.location}.</p>
+      </div>
+      <div class="resume-tools__actions">
+        <a class="button button--ink" href="/resume.pdf" download="Malik-Akintola-Resume.pdf">Download PDF</a>
+        <button type="button" class="link strong" onclick="window.print()">Print</button>
+      </div>
+    </div>
+
+    <article class="resume" aria-label={`Résumé of ${me.name}`}>
+      <header class="resume__head">
+        <h2 class="resume__name">{me.name}</h2>
+        <p class="resume__role">{me.role}</p>
+        <p class="resume__contact">
+          <a href={`mailto:${me.email}`}>{me.email}</a>
+          {me.showPhoneOnResume && me.phone && <span>{me.phone}</span>}
+          <a href={me.linkedin}>{strip(me.linkedin)}</a>
+          <a href={me.github}>{strip(me.github)}</a>
+          <a href={Astro.site!.href}>{site}</a>
+          <span>{me.location}</span>
+        </p>
+      </header>
+
+      <section>
+        <h3>Profile</h3>
+        <p>{me.resumeSummary}</p>
+      </section>
+
+      <section>
+        <h3>Experience</h3>
+        {work.map((r) => (
+          <div class="resume__item">
+            <p class="resume__line"><span><strong>{r.data.role}</strong>, {r.data.org}</span><span class="resume__when">{span(r.data.start, r.data.end)}</span></p>
+            <ul>{r.data.points.map((pt) => <li>{pt}</li>)}</ul>
+          </div>
+        ))}
+      </section>
+
+      <section>
+        <h3>Teaching and volunteering</h3>
+        {volunteer.map((r) => (
+          <div class="resume__item">
+            <p class="resume__line"><span><strong>{r.data.role}</strong>, {r.data.org}</span><span class="resume__when">{span(r.data.start, r.data.end)}</span></p>
+            <ul>{r.data.points.map((pt) => <li>{pt}</li>)}</ul>
+          </div>
+        ))}
+      </section>
+
+      <section>
+        <h3>Selected projects</h3>
+        {projects.map((p) => (
+          <div class="resume__item">
+            <p class="resume__line"><span><strong><a href={new URL(`/projects/${p.id}/`, Astro.site).href}>{p.data.title}</a></strong>, {p.data.discipline}</span><span class="resume__when">{p.data.year}</span></p>
+            <p>{p.data.summary}</p>
+          </div>
+        ))}
+      </section>
+
+      <section>
+        <h3>Education</h3>
+        <div class="resume__item">
+          <p class="resume__line"><span><strong>{me.education.degree}</strong>, {me.education.school}</span><span class="resume__when">{me.education.years}</span></p>
+          <p>{me.education.grade}{me.education.award && `. ${me.education.award}.`}</p>
+          {me.education.coursework && <p>Coursework: {me.education.coursework}.</p>}
+        </div>
+      </section>
+
+      <section>
+        <h3>Certifications</h3>
+        <ul class="resume__plain">
+          {certs.map((c) => (
+            <li class="resume__line"><span><a href={c.data.url}>{c.data.name}</a>{c.data.code && ` (${c.data.code})`}</span><span class="resume__when">{c.data.year}</span></li>
+          ))}
+        </ul>
+      </section>
+
+      <section>
+        <h3>Skills</h3>
+        <ul class="resume__plain">
+          {me.skills.map((s) => <li><strong>{s.group}:</strong> {s.items.join(', ')}</li>)}
+        </ul>
+      </section>
+    </article>
+  </main>
+</Base>
+
+<style>
+  .resume-page { padding-bottom: 6rem; }
+  .resume-tools { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 1.5rem 3rem; padding-block: 3rem 5rem; }
+  .resume-tools__lead { margin-top: 1rem; max-width: 40ch; }
+  .resume-tools__actions { display: flex; align-items: center; gap: 1.5rem; }
+
+  .resume {
+    width: min(100% - 2 * var(--margin), 46rem);
+    margin-inline: auto;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  .resume__name { font-weight: 500; font-size: 2.25rem; letter-spacing: -0.02em; line-height: 1.1; }
+  .resume__role { font-size: 1.125rem; font-weight: 600; margin-top: 0.25rem; }
+  .resume__contact { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; margin-top: 0.75rem; max-width: none; font-size: 0.875rem; }
+  .resume a { color: inherit; }
+  .resume section { margin-top: 1.5rem; }
+  .resume h3 { font-size: 0.9375rem; font-weight: 700; padding-bottom: 0.25rem; margin-bottom: 0.625rem; background: none; }
+  .resume p { max-width: none; }
+  .resume__item + .resume__item { margin-top: 0.75rem; }
+  .resume__line { display: flex; justify-content: space-between; gap: 1rem; }
+  .resume__line > span:first-child { flex: 0 1 auto; min-width: 0; }
+  .resume__when { margin-left: auto; padding-left: 1rem; white-space: nowrap; color: #4a4a4a; font-variant-numeric: tabular-nums; }
+  .resume ul { margin-top: 0.25rem; padding-left: 1.1rem; display: grid; gap: 0.15rem; }
+  .resume__plain { padding-left: 0 !important; list-style: none; }
+
+  @media (max-width: 40em) {
+    .resume__line { flex-wrap: wrap; }
+    .resume__when { margin-left: 0; padding-left: 0; width: 100%; }
+  }
+
+  @media print {
+    @page { size: A4; margin: 13mm 14mm; }
+    :global(html), :global(body) { background: #fff !important; color: #000; }
+    :global(.skip), .no-print { display: none !important; }
+    .resume-page { padding: 0; }
+    .resume { width: 100%; padding: 0; background: #fff !important; font-size: 9.2pt; line-height: 1.4; }
+    .resume__name { font-size: 22pt; }
+    .resume section { margin-top: 11pt; break-inside: auto; }
+    .resume__item { break-inside: avoid; }
+    .resume h3 { font-size: 10.5pt; }
+    .resume a { text-decoration: none; }
+  }
+</style>

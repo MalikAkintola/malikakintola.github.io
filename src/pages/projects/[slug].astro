@@ -1,0 +1,160 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import { Image, getImage } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import SiteNav from '../../components/SiteNav.astro';
+import Footer from '../../components/Footer.astro';
+
+export async function getStaticPaths() {
+  const projects = (await getCollection('projects', (p) => !p.data.draft)).sort((a, b) => a.data.order - b.data.order);
+  return projects.map((project, i) => ({
+    params: { slug: project.id },
+    props: { project, next: projects[(i + 1) % projects.length] },
+  }));
+}
+
+interface Props { project: CollectionEntry<'projects'>; next: CollectionEntry<'projects'> }
+const { project, next } = Astro.props;
+const p = project.data;
+const { Content } = await render(project);
+const og = await getImage({ src: p.cover, width: 1200, height: 630, fit: 'cover', format: 'jpg' });
+---
+<Base title={`${p.title}, a case study by Malik Akintola`} description={p.summary} image={og.src}>
+  <SiteNav />
+  <main id="main">
+    <header class="case-head">
+      <div class="grid">
+        <h1 class="case-title display" data-reveal>{p.title}</h1>
+        <div class="case-finding" data-reveal style="--i: 1">
+          <p class="case-finding__num nums">{p.finding}</p>
+          <p class="case-finding__note">{p.findingNote}</p>
+        </div>
+        <div class="case-side" data-reveal style="--i: 2">
+          <dl class="case-meta">
+            <div><dt class="small muted">Kind of work</dt><dd>{p.discipline}</dd></div>
+            <div><dt class="small muted">Year</dt><dd class="nums">{p.year}</dd></div>
+            <div class="case-meta__tools"><dt class="small muted">Built with</dt><dd>{p.tools.join(', ')}</dd></div>
+          </dl>
+          <div class="case-actions">
+            {p.dashboard && <a class="button" href="#dashboard">See the live dashboard</a>}
+            {p.article && <a class="link" href={p.article} rel="noopener" target="_blank">Read on Medium</a>}
+            {p.repo && <a class="link" href={p.repo} rel="noopener" target="_blank">Code on GitHub</a>}
+          </div>
+        </div>
+      </div>
+      <figure class="case-cover grid" data-reveal style="--i: 3">
+        <Image src={p.cover} alt={p.coverAlt} widths={[640, 1024, 1600, 2400]} sizes="(max-width: 100rem) calc(100vw - 5rem), 100rem" loading="eager" fetchpriority="high" />
+      </figure>
+    </header>
+
+    <section class="band case-body" aria-label="Case study">
+      <div class="grid">
+        <div class="rail">
+          <div class="rail__inner">
+            <p class="case-summary lead">{p.summary}</p>
+          </div>
+        </div>
+        <div class="content case-prose">
+          <Content />
+        </div>
+      </div>
+    </section>
+
+    {p.gallery.length > 0 && (
+      <section class="band band--grey case-gallery" aria-label="More from the report">
+        <div class="grid">
+          {p.gallery.map((g, i) => (
+            <figure class:list={['case-figure', i % 2 === 1 && 'case-figure--right']} data-reveal>
+              <Image src={g.src} alt={g.alt} widths={[640, 1024, 1600, 2400]} sizes="(max-width: 60em) 100vw, 70vw" />
+              {g.caption && <figcaption class="small muted">{g.caption}</figcaption>}
+            </figure>
+          ))}
+        </div>
+      </section>
+    )}
+
+    {p.dashboard && (
+      <section id="dashboard" class="band case-dash" aria-labelledby="dash-title">
+        <div class="grid">
+          <div class="rail">
+            <div class="rail__inner">
+              <h2 id="dash-title" class="head" data-reveal>The live dashboard</h2>
+              <p data-reveal style="--i: 1">The report as published in Power BI. Use the arrows at its foot to move between pages.</p>
+            </div>
+          </div>
+          <div class="content">
+            <div class="case-dash__frame" data-reveal style="--i: 2" data-embed={p.dashboard} data-embed-title={`${p.title}, live Power BI dashboard`}>
+              <div class="case-dash__poster" data-embed-poster>
+                <Image src={p.cover} alt="" widths={[640, 1024, 1600]} sizes="(max-width: 60em) 100vw, 62vw" />
+                <div class="case-dash__cta">
+                  <button type="button" class="button" data-embed-load>Load the dashboard here</button>
+                  <a class="link small" href={p.dashboard} rel="noopener" target="_blank">or open it in Power BI</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    )}
+
+    <nav class="band band--ink case-next" aria-label="Next case study">
+      <a class="grid case-next__link" href={`/projects/${next.id}/`}>
+        <span class="case-next__title display">{next.data.title}</span>
+        <span class="case-next__label muted">Next case study</span>
+      </a>
+    </nav>
+  </main>
+  <Footer />
+</Base>
+
+<style>
+  .case-head { padding-top: clamp(3rem, 8vh, 5.5rem); }
+  .case-title { grid-column: 1 / span 9; max-width: 18ch; font-size: clamp(2.5rem, 1.4rem + 4.2vw, 5.5rem); line-height: 1.02; }
+  .case-finding { grid-column: 1 / span 7; display: grid; grid-template-columns: auto 1fr; gap: 1.25rem; align-items: baseline; margin-top: 2.5rem; }
+  .case-finding__num { font-size: var(--step-head); font-weight: 500; letter-spacing: -0.02em; }
+  .case-finding__note { font-size: var(--step-lead); line-height: 1.4; max-width: 34ch; }
+  .case-side { grid-column: 9 / -1; align-self: end; display: grid; gap: 1.5rem; }
+  .case-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1.5rem; }
+  .case-meta dd { margin-top: 0.125rem; }
+  .case-meta__tools { grid-column: 1 / -1; }
+  .case-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.5rem; }
+  .case-cover { margin-top: clamp(2.5rem, 5vw, 4rem); }
+  .case-cover img { grid-column: 1 / -1; width: 100%; height: auto; background: var(--surface); }
+
+  .case-summary { font-weight: 500; }
+  .case-prose { max-width: 70ch; }
+  .case-prose :global(h2) { font-size: var(--step-lead); font-weight: 600; letter-spacing: -0.01em; margin: 2.75rem 0 0.75rem; }
+  .case-prose :global(h2:first-child) { margin-top: 0; }
+  .case-prose :global(p + p) { margin-top: 1em; }
+  .case-prose :global(ul), .case-prose :global(ol) { padding-left: 1.25rem; display: grid; gap: 0.5rem; margin-top: 1rem; }
+  .case-prose :global(pre) { margin: 1.5rem 0; padding: 1.25rem; background: var(--surface); overflow-x: auto; font-size: 0.875rem; line-height: 1.6; }
+  .case-prose :global(code) { font-family: ui-monospace, 'Cascadia Code', Consolas, monospace; }
+
+  .case-gallery .grid { row-gap: clamp(3.5rem, 7vw, 6rem); }
+  .case-figure { grid-column: 1 / span 9; }
+  .case-figure--right { grid-column: 4 / -1; }
+  .case-figure img { width: 100%; height: auto; }
+  .case-figure figcaption { margin-top: 0.75rem; max-width: 60ch; }
+
+  .case-dash .rail__inner { position: static; }
+  .case-dash__frame { position: relative; aspect-ratio: 16 / 10; overflow: hidden; background: var(--surface); }
+  .case-dash__frame :global(iframe) { width: 100%; height: 100%; border: 0; }
+  .case-dash__poster, .case-dash__poster img { width: 100%; height: 100%; }
+  .case-dash__poster img { object-fit: cover; opacity: 0.16; filter: grayscale(1); }
+  .case-dash__cta { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 1rem; }
+
+  .case-next { padding-bottom: 2rem; }
+  .case-next__link { text-decoration: none; row-gap: 0.75rem; }
+  .case-next__title { grid-column: 1 / span 10; font-size: clamp(2.25rem, 1.2rem + 4vw, 5rem); line-height: 1.05; transition: color var(--t-hover) ease; }
+  .case-next__label { grid-column: 1 / -1; }
+  @media (hover: hover) and (pointer: fine) {
+    .case-next__link:hover .case-next__title { text-decoration: underline; text-decoration-thickness: 0.04em; text-underline-offset: 0.12em; }
+  }
+
+  @media (max-width: 60em) {
+    .case-title, .case-finding, .case-side, .case-figure, .case-figure--right, .case-next__title { grid-column: 1 / -1; }
+    .case-side { margin-top: 2rem; }
+    .case-finding { grid-template-columns: 1fr; gap: 0.5rem; }
+    .case-dash__frame { aspect-ratio: 3 / 4; }
+  }
+</style>

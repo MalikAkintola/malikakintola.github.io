@@ -1,0 +1,20 @@
+Vendored copy of Vercel's "web-design-guidelines" skill, with its rules pinned locally.
+
+SKILL.md
+  Source:  https://github.com/vercel-labs/agent-skills  (skills/web-design-guidelines/SKILL.md)
+  Commit:  1a2c79d4e6c4a2283dc2c614b6538cbe1ed5ca62  (2026-10-27)
+  License: MIT (stated in that repo's README)
+  Changed: upstream tells the agent to WebFetch the rules from the unpinned `main` branch URL
+           https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md
+           before every review. This copy reads guidelines.md instead. Nothing else was changed.
+
+guidelines.md
+  Source:  https://github.com/vercel-labs/web-interface-guidelines  (command.md, unmodified)
+  Commit:  434b7f91364665f2f733b310ec54809bf8f37937  (2026-10-05)
+  Git blob: 3eb3a212b7b89493922ea418489d4c6f67ae8bd5  (check: git hash-object guidelines.md)
+  License: MIT, see LICENSE in this folder
+
+Pinned: 2026-10-29, after a security review of both commits.
+
+This copy does not track upstream. To update, review the diff first:
+  https://github.com/vercel-labs/web-interface-guidelines/compare/434b7f9...main

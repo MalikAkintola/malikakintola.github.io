@@ -1,0 +1,124 @@
+---
+// Showcase: "Live demo with controls", carrying the page's live thing. Customer A and B from the RFM
+// article, ranked two ways. The controls change each customer's recency, orders and spend; both
+// rankings update at once. With two customers, RFM is three head-to-head comparisons.
+interface Props { article?: string }
+const { article } = Astro.props;
+const customers = [
+  { id: 'a', name: 'Customer A', days: 150, orders: 1, spent: 575 },
+  { id: 'b', name: 'Customer B', days: 10, orders: 8, spent: 450 },
+];
+const controls = [
+  { key: 'days', label: 'Days since last order', min: 1, max: 365, step: 1 },
+  { key: 'orders', label: 'Orders', min: 1, max: 20, step: 1 },
+  { key: 'spent', label: 'Spent, $', min: 50, max: 1000, step: 5 },
+] as const;
+---
+<section id="teaching" class="band band--grey" aria-labelledby="rfm-title">
+  <div class="grid">
+  <div class="rail">
+    <div class="rail__inner">
+      <h2 id="rfm-title" class="head" data-reveal>Revenue picks the wrong customer</h2>
+      <p data-reveal style="--i: 1">
+        Customer A spent $575 once, 150 days ago. Customer B has spent $450 over eight orders, the last one
+        ten days ago. It is the example I start with when I teach segmentation.
+      </p>
+      <p class="muted" data-reveal style="--i: 2">Move any slider and both rankings update at once.</p>
+    </div>
+  </div>
+
+  <div class="content">
+  <div class="rfm__panel" data-rfm data-reveal>
+    <div class="rfm__demo" data-ui>
+      <div class="rfm__table">
+        <p class="rfm__caption">Ranked by revenue</p>
+        <ol class="rfm__list" data-rank="revenue">
+          {customers.map((c) => (
+            <li class="rfm__item" data-c={c.id}>
+              <span class="rfm__who">{c.name}</span>
+              <span class="rfm__val nums" data-out={`${c.id}-spent`}>${c.spent}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
+      <div class="rfm__table">
+        <p class="rfm__caption">
+          Ranked by RFM
+          <span class="rfm__cols" aria-hidden="true"><span>R</span><span>F</span><span>M</span></span>
+        </p>
+        <ol class="rfm__list" data-rank="rfm">
+          {customers.map((c) => (
+            <li class="rfm__item" data-c={c.id}>
+              <span class="rfm__who">{c.name}</span>
+              <span class="rfm__marks" data-marks={c.id}>
+                <span data-mark="r">{c.id === 'b' ? 'Yes' : 'No'}</span>
+                <span data-mark="f">{c.id === 'b' ? 'Yes' : 'No'}</span>
+                <span data-mark="m">{c.id === 'a' ? 'Yes' : 'No'}</span>
+              </span>
+            </li>
+          ))}
+        </ol>
+      </div>
+      <p class="rfm__verdict" aria-live="polite" data-verdict>Revenue puts Customer A first. RFM puts Customer B first.</p>
+      <p class="rfm__how">Each customer wins a point for the more recent order, the more orders and the higher spend.</p>
+      {article && <a class="rfm__article link" href={article} rel="noopener" target="_blank">Read the article</a>}
+    </div>
+
+    <div class="rfm__controls" data-ui>
+      {customers.map((c) => (
+        <fieldset class="rfm__set">
+          <legend class="rfm__legend">{c.name}</legend>
+          {controls.map((k) => (
+            <label class="rfm__control">
+              <span class="rfm__label">{k.label}</span>
+              <output class="rfm__value nums" data-show={`${c.id}-${k.key}`}>{c[k.key]}</output>
+              <input type="range" min={k.min} max={k.max} step={k.step} value={c[k.key]} data-in={`${c.id}-${k.key}`} />
+            </label>
+          ))}
+        </fieldset>
+      ))}
+      <button type="button" class="rfm__reset link" data-reset>Reset to the article’s numbers</button>
+    </div>
+  </div>
+  </div>
+  </div>
+</section>
+
+<style>
+  .rfm__panel {
+    display: grid;
+    grid-template-columns: 62fr 38fr;
+    background: var(--bg);
+    font-size: 0.9375rem;
+  }
+  .rfm__demo { display: flex; flex-direction: column; gap: 1.5rem; padding: clamp(1.5rem, 3vw, 2.5rem); background: #ffffff; }
+  .rfm__caption { display: flex; justify-content: space-between; font-weight: 600; padding-bottom: 0.375rem; }
+  .rfm__cols, .rfm__marks { display: inline-grid; grid-template-columns: repeat(3, 2.5rem); text-align: center; }
+  .rfm__cols { color: var(--muted); font-weight: 400; }
+  .rfm__list { display: grid; gap: 0.375rem; }
+  .rfm__item { display: flex; justify-content: space-between; align-items: baseline; padding: 0.625rem 0.875rem; background: var(--bg); }
+  .rfm__list { counter-reset: none; }
+  .rfm__item:first-child .rfm__who { font-weight: 600; }
+  .rfm__val { font-size: 1.5rem; font-weight: 500; }
+  .rfm__marks span { color: var(--muted); }
+  .rfm__marks span[data-won='true'] { color: var(--ink); font-weight: 600; }
+  .rfm__verdict { font-size: var(--step-body); font-weight: 600; }
+  .rfm__how { color: var(--muted); }
+  .rfm__article { margin-top: auto; align-self: flex-start; }
+
+  .rfm__controls { padding: clamp(1.5rem, 3vw, 2.5rem); background: var(--surface); display: grid; align-content: start; gap: 1rem; }
+  .rfm__set { border: 0; margin: 0; padding: 0; display: grid; }
+  .rfm__legend { font-weight: 600; padding: 0 0 0.25rem; }
+  .rfm__control { display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: 0.75rem; min-height: 2.75rem; padding-block: 0.25rem; }
+  .rfm__label { color: var(--muted); }
+  .rfm__value { font-weight: 600; }
+  .rfm__control input { grid-column: 1 / -1; width: 100%; accent-color: var(--ink); min-height: 1.5rem; }
+  .rfm__reset { justify-self: start; font-size: 0.9375rem; color: var(--ink); }
+  html:not(.js) .rfm__controls { display: none; }
+  html:not(.js) .rfm__panel { grid-template-columns: 1fr; }
+
+  @media (max-width: 60em) {
+    .rfm__panel { grid-template-columns: 1fr; }
+    .rfm__demo { padding: 1.5rem; }
+  }
+</style>
