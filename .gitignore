@@ -8,6 +8,7 @@ test-results/
 playwright-report/
 .playwright-cli/
 .taste-skill/
+.wrangler/
 
 # local files
 .env
