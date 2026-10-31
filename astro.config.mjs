@@ -2,7 +2,7 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
 // The site's public address. Change it here when the custom domain is connected.
-const SITE = 'https://malikakintola.pages.dev';
+const SITE = 'https://malikakintola.malikola223.workers.dev';
 
 export default defineConfig({
   site: SITE,
