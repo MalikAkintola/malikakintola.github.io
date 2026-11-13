@@ -1,5 +1,5 @@
 ---
-// The plain bar on inner pages: name, the four destinations, one action.
+// The plain bar on inner pages: name, the five destinations, one action.
 import { getEntry } from 'astro:content';
 const me = (await getEntry('profile', 'me'))!.data;
 const path = Astro.url.pathname;
@@ -9,6 +9,7 @@ const path = Astro.url.pathname;
   <div class="nav__links">
     <a class="link" href="/projects/" aria-current={path.startsWith('/projects') ? 'page' : undefined}>Projects</a>
     <a class="link" href="/blog/" aria-current={path.startsWith('/blog') ? 'page' : undefined}>Blog</a>
+    <a class="link" href="/trainings/" aria-current={path.startsWith('/trainings') ? 'page' : undefined}>Trainings</a>
     <a class="link" href={me.linkedin} rel="noopener" target="_blank">LinkedIn</a>
     <a class="link" href="/resume/" aria-current={path.startsWith('/resume') ? 'page' : undefined}>Résumé</a>
   </div>

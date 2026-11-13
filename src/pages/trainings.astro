@@ -1,0 +1,663 @@
+---
+// Trainings. The four packages from src/content/trainings.yaml, compared in one large table; the
+// complete package drawn as its three months; each course's eight modules; photographs of classes in
+// two rows that drift in opposite directions; and corporate training by email in the closing band.
+// Prices show in naira for learners in Nigeria and in dollars elsewhere; the visitor can switch.
+import { getCollection, getEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Base from '../layouts/Base.astro';
+import SiteNav from '../components/SiteNav.astro';
+import Footer from '../components/Footer.astro';
+import { span } from '../lib/dates';
+import { nb } from '../lib/text';
+
+const me = (await getEntry('profile', 'me'))!.data;
+const packages = (await getCollection('trainings')).sort((a, b) => a.data.order - b.data.order).map((p) => ({ id: p.id, ...p.data }));
+const programme = packages.find((p) => p.kind === 'programme')!;
+const courses = packages.filter((p) => p.kind === 'course');
+const hourly = courses[0];
+const fromNgn = Math.min(...courses.map((c) => c.ngn));
+const fromUsd = Math.min(...courses.map((c) => c.usd));
+// The complete package against booking the same hours one by one.
+const monthHours = (programme.hoursPerWeek ?? 4) * 4;
+const saving = Math.round((1 - programme.ngn / (hourly.ngn * monthHours)) * 100);
+
+// The teaching roles from experience.yaml, as the record beside the photographs.
+const teachingIds = ['hagital', 'career-expo', 'investment-society', 'dsn'];
+const roles = await getCollection('experience');
+const record = teachingIds.map((id) => roles.find((r) => r.id === id)).filter((r) => r !== undefined);
+
+// Photographs of classes: every picture in src/assets/Training Pictures. Write what each one shows
+// here, by file name, for people who cannot see it.
+const files = import.meta.glob<{ default: ImageMetadata }>('../assets/Training Pictures/*.{jpg,jpeg,png,webp}', { eager: true });
+const alts: Record<string, string> = {
+  '20241207_113129.jpg': 'Teaching from a lectern in a computer lab, with the lesson on the screen behind',
+  '20250218_120122.jpg': 'Learners with laptops round a long table, following code on a large wall screen',
+  'IMG_20230707_135422.jpg': 'A group photograph from a free AI class, the class holding its banner in front of a painted wall',
+  'VideoCapture_20241208-182649.jpg': 'Teaching from the lectern in a computer lab, with data on the screen behind',
+  'VideoCapture_20241210-163438.jpg': 'Teaching from the lectern beside a spreadsheet on the wall screen',
+  'VideoCapture_20241216-224532.jpg': 'Presenting a Power BI dashboard to a class seated round a conference table',
+  'VideoCapture_20241216-224618.jpg': 'A class with laptops watching a dashboard walkthrough on the wall screen',
+  'VideoCapture_20241216-224805.jpg': 'Walking a class through a dashboard on the wall screen',
+  'VideoCapture_20241217-132543.jpg': 'Teaching from the lectern beside a dashboard on the wall screen',
+};
+const photos = Object.entries(files)
+  .map(([path, mod]) => {
+    const name = path.split('/').pop()!;
+    return { name, src: mod.default, alt: alts[name] ?? 'A training class in session' };
+  })
+  .sort((a, b) => a.name.localeCompare(b.name));
+const byName = (n: string) => photos.find((p) => p.name === n);
+const lead = byName('20250218_120122.jpg') ?? photos[0];
+const closing = byName('VideoCapture_20241216-224805.jpg') ?? photos[photos.length - 1];
+// Two rows of every photograph, in different orders, so the rows never show the same pair.
+const rowA = photos;
+const rowB = [...photos.slice(Math.ceil(photos.length / 2)), ...photos.slice(0, Math.ceil(photos.length / 2))].reverse();
+
+const ngn = (n: number) => `₦${n.toLocaleString('en-US')}`;
+const usd = (n: number) => `$${n.toLocaleString('en-US')}`;
+const per = (p: (typeof packages)[number]) => (p.per === 'month' ? 'a month' : 'an hour');
+
+const mail = (subject: string, body: string) =>
+  `mailto:${me.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+const bookingMail = (name: string) =>
+  mail(`Training: ${name}`, `Hello Malik,\n\nI would like to book the ${name}.\n\nWhere I am based:\nWhat I can do so far:\nWhat I want to be able to do:\nWhen I am free for sessions:\n\nThank you.`);
+const corporateMail = mail(
+  'Corporate training',
+  `Hello Malik,\n\nWe would like training for our team.\n\nCompany:\nNumber of people:\nTools (Excel, SQL, Power BI):\nWhat the team needs to be able to do:\nPreferred dates and format:\n\nThank you.`,
+);
+const generalMail = mail('Training', 'Hello Malik,\n\nI would like to learn data analysis with you.\n\nWhere I am based:\nWhat I want to learn:\n\nThank you.');
+
+const anchorOf = (p: (typeof packages)[number]) => (p.kind === 'programme' ? '#complete' : `#${p.id}`);
+const rows = ['What you learn', 'Typical length', 'Sessions', 'Paying'] as const;
+---
+<Base
+  title={`Trainings, ${me.name}`}
+  description={`One-on-one online training in Excel, SQL and Power BI with ${me.name}, from ${ngn(fromNgn)} or ${usd(fromUsd)} an hour, and a three-month complete data analysis package. Corporate training by email.`}
+>
+  <script is:inline slot="head">
+    (function () {
+      var c = null;
+      try { c = localStorage.getItem('currency'); } catch (e) {}
+      if (c !== 'ngn' && c !== 'usd') {
+        var tz = '';
+        try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
+        c = tz === 'Africa/Lagos' ? 'ngn' : 'usd';
+      }
+      document.documentElement.dataset.currency = c;
+    })();
+  </script>
+  <SiteNav />
+  <main id="main" class="trainings">
+    <header class="grid page-head">
+      <h1 class="display page-head__title" data-reveal>Trainings</h1>
+      <div class="page-head__side">
+        <p class="lead" data-reveal style="--i: 1">
+          {nb('Learn Excel, SQL and Power BI with me, one-on-one and online, at your pace, with AI built into every course.')}
+        </p>
+        <p data-reveal style="--i: 2">
+          {nb(`I have taught more than 600 learners and hold Microsoft’s Power BI and Fabric certifications. Courses from `)}<span class="price"><span data-cur="ngn">{ngn(fromNgn)}</span><span class="price__or"> or </span><span data-cur="usd">{usd(fromUsd)}</span></span> an hour.
+        </p>
+        <div class="page-head__actions" data-reveal style="--i: 3">
+          <a class="button" href="#packages">See the four packages</a>
+          <a class="link" href="#corporate">Training a team? Email me</a>
+        </div>
+      </div>
+      <figure class="lead-photo" data-reveal style="--i: 2">
+        <div class="lead-photo__frame">
+          <Image src={lead.src} alt={lead.alt} widths={[640, 960, 1280, 1920, 2560]} sizes="(max-width: 100rem) 94vw, 100rem" loading="eager" fetchpriority="high" />
+        </div>
+      </figure>
+    </header>
+
+    <!-- The packages, compared. Each package is one column (one block on a phone); the labels on the
+         left are drawn once for the eye, and repeated inside each cell for screen readers. -->
+    <section id="packages" class="band band--grey packages" aria-labelledby="packages-title">
+      <div class="grid">
+        <div class="plans">
+          <div class="plans__intro">
+            <h2 id="packages-title" class="head" data-reveal>Four packages</h2>
+            <p data-reveal style="--i: 1">
+              {nb('All three tools in one three-month programme, or one tool at a time, booked by the hour. Every session is live, online and one-on-one.')}
+            </p>
+            <div class="currency" role="group" aria-labelledby="currency-label" data-reveal style="--i: 2">
+              <span id="currency-label" class="currency__label">Show prices for learners</span>
+              <div class="currency__options">
+                <button type="button" class="currency__option" data-currency-set="ngn" aria-pressed="false">In Nigeria, ₦</button>
+                <button type="button" class="currency__option" data-currency-set="usd" aria-pressed="false">Elsewhere, $</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="plans__labels" aria-hidden="true">
+            {rows.map((r) => <div class="plans__label">{r}</div>)}
+            <div class="plans__label"></div>
+          </div>
+
+          {packages.map((p, i) => (
+            <article class:list={['plan', p.kind === 'programme' && 'plan--featured band--ink']} aria-labelledby={`plan-${p.id}`} data-reveal style={`--i: ${i + 1}`}>
+              <div class="plan__head">
+                <h3 id={`plan-${p.id}`} class="plan__name"><span class="sr-only">{p.name}: </span><span aria-hidden="true">{p.short}</span></h3>
+                <p class="plan__price nums">
+                  <span class="price"><span data-cur="ngn">{ngn(p.ngn)}</span><span class="price__or"> or </span><span data-cur="usd">{usd(p.usd)}</span></span>
+                  <span class="plan__per">{per(p)}</span>
+                </p>
+                {p.kind === 'programme' && <p class="plan__note">{saving}% below the hourly rate</p>}
+              </div>
+              <div class="plan__cell">
+                <span class="plan__label">What you learn</span>
+                <p>{nb(p.learn)}</p>
+                <a class="link plan__more" href={anchorOf(p)} data-show-course={p.kind === 'course' ? p.id : undefined}>
+                  {p.kind === 'programme' ? 'See the three months' : 'See the eight modules'}
+                </a>
+              </div>
+              <div class="plan__cell plan__cell--alt">
+                <span class="plan__label">Typical length</span>
+                <p>{p.kind === 'programme' ? p.length : `${p.length}, longer if you book more hours`}</p>
+              </div>
+              <div class="plan__cell">
+                <span class="plan__label">Sessions</span>
+                <p>{p.kind === 'programme'
+                  ? `Two 2-hour sessions a week, ${monthHours} hours a month`
+                  : '2-hour sessions, booked by the hour'}</p>
+              </div>
+              <div class="plan__cell plan__cell--alt">
+                <span class="plan__label">Paying</span>
+                {p.kind === 'programme' ? (
+                  <p>At the start of each month, or <span class="price nums"><span data-cur="ngn">{ngn(p.ngn / 2)}</span><span class="price__or"> or </span><span data-cur="usd">{usd(p.usd / 2)}</span></span> before each block of four sessions</p>
+                ) : (
+                  <p>Before sessions begin. A 2-hour session is <span class="price nums"><span data-cur="ngn">{ngn(p.ngn * 2)}</span><span class="price__or"> or </span><span data-cur="usd">{usd(p.usd * 2)}</span></span></p>
+                )}
+              </div>
+              <div class="plan__cell plan__cell--action">
+                <a class:list={['button', p.kind !== 'programme' && 'button--ink']} href={bookingMail(p.name)}>Book {p.short}</a>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        <div class="packages__after">
+          <h3 class="packages__after-title" data-reveal>Every package includes</h3>
+          <ul class="packages__included" data-reveal style="--i: 1">
+            <li>Sessions paced to your level and goals</li>
+            <li>Practice datasets and exercises</li>
+            <li>Feedback on your work</li>
+            <li>Support between sessions</li>
+            <li>A capstone project for your portfolio</li>
+            <li>A module on using AI well</li>
+          </ul>
+          <p class="packages__terms small" data-reveal style="--i: 2">
+            All sessions are online, at times agreed in advance. Payment is made before sessions begin. Naira
+            prices are for learners in Nigeria, dollar prices for learners elsewhere.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- The complete package as its own chart: three months end to end, AI under all of them. -->
+    <section id="complete" class="band complete" aria-labelledby="complete-title">
+      <div class="grid">
+        <div class="rail">
+          <div class="rail__inner">
+            <h2 id="complete-title" class="head" data-reveal>Three months, three tools</h2>
+            <p data-reveal style="--i: 1">
+              {nb(`The ${programme.name} takes you through Excel, SQL and Power BI one after another, in two 2-hour sessions a week, and ends with a capstone project for your portfolio.`)}
+            </p>
+            <p class="complete__price nums" data-reveal style="--i: 2">
+              <span class="price"><span data-cur="ngn">{ngn(programme.ngn)}</span><span class="price__or"> or </span><span data-cur="usd">{usd(programme.usd)}</span></span> {per(programme)}
+            </p>
+            <div data-reveal style="--i: 3"><a class="button" href={bookingMail(programme.name)}>Book the {programme.short} package</a></div>
+          </div>
+        </div>
+
+        <div class="content">
+          <div class="months" data-reveal>
+            {programme.months?.map((m, i) => (
+              <div class="months__bar" aria-hidden="true" style={`--col: ${i + 1}; --row: ${i * 2 + 1}; --i: ${i}`}><span>{m.tool}</span></div>
+            ))}
+            <div class="months__ai" aria-hidden="true" style={`--i: ${programme.months?.length ?? 3}`}><span>AI, in every module</span></div>
+            {programme.months?.map((m, i) => (
+              <div class="months__text" style={`--col: ${i + 1}; --row: ${i * 2 + 2}`}>
+                <h3 class="months__title">Month {i + 1}: {m.tool}</h3>
+                <p>{nb(m.text)}</p>
+              </div>
+            ))}
+          </div>
+
+          <div class="complete__more">
+            <div data-reveal>
+              <h3 class="complete__subhead">AI all the way through</h3>
+              <p>{nb(programme.ai ?? '')}</p>
+            </div>
+            <div data-reveal style="--i: 1">
+              <h3 class="complete__subhead">Included</h3>
+              <ul class="complete__list">
+                {programme.included.map((item) => <li>{item}</li>)}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- The three courses. With script, one course shows at a time; without it, all three in turn. -->
+    <section id="courses" class="band band--grey courses" aria-labelledby="courses-title">
+      <div class="grid">
+        <div class="rail">
+          <div class="rail__inner">
+            <h2 id="courses-title" class="head" data-reveal>One tool at a time</h2>
+            <p data-reveal style="--i: 1">
+              {nb('Each course is eight modules, taught in order at your pace and booked by the hour. Each one ends with AI in your workflow and a project of your own.')}
+            </p>
+            <div class="tabs" role="tablist" aria-label="Courses" data-tabs data-reveal style="--i: 2">
+              {courses.map((c, i) => (
+                <button type="button" class="tabs__tab" role="tab" id={`tab-${c.id}`} aria-controls={c.id} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-tab={c.id}>{c.short}</button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div class="content">
+          {courses.map((c, i) => (
+            <div class="course" id={c.id} role="tabpanel" aria-labelledby={`tab-${c.id}`} data-panel={c.id} data-active={i === 0 ? 'true' : 'false'}>
+              <div class="course__head" data-reveal>
+                <h3 class="course__name">{nb(c.name)}</h3>
+                <p class="lead">{nb(c.summary)}</p>
+                <p class="course__facts nums">
+                  <span class="price"><span data-cur="ngn">{ngn(c.ngn)}</span><span class="price__or"> or </span><span data-cur="usd">{usd(c.usd)}</span></span> {per(c)}, {c.length.toLowerCase()}
+                </p>
+              </div>
+              <ol class="course__modules" data-reveal style="--i: 1">
+                {c.modules?.map((m) => (
+                  <li><span class="course__module">{nb(m.title)}</span> {nb(m.text)}</li>
+                ))}
+              </ol>
+              <div class="course__foot" data-reveal style="--i: 2">
+                <p class="small">{c.included.join('. ')}.</p>
+                <a class="button" href={bookingMail(c.name)}>Book {c.short}</a>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Photographs of classes: two rows drifting in opposite directions, with the teaching record. -->
+    <section id="classroom" class="band classroom" aria-labelledby="classroom-title">
+      <div class="grid classroom__head">
+        <div class="classroom__intro">
+          <h2 id="classroom-title" class="head" data-reveal>In the classroom</h2>
+          <p data-reveal style="--i: 1">{nb('Classes I have taught in person, in Excel, SQL, Power BI and AI.')}</p>
+          <button type="button" class="classroom__pause link" data-marquee-toggle aria-pressed="false" data-reveal style="--i: 2">Pause the photographs</button>
+        </div>
+        <ul class="record">
+          {record.map((r, i) => (
+            <li class="record__item" data-reveal style={`--i: ${i}`}>
+              <p class="record__role"><span class="strong">{r.data.role}</span>, {r.data.org}</p>
+              <p class="record__when small muted nums">{span(r.data.start, r.data.end)}</p>
+              <p class="record__point">{nb(r.data.points[0])}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="marquees" data-marquees>
+        {[rowA, rowB].map((row, r) => (
+          <div class:list={['marquee', r === 1 && 'marquee--reverse']}>
+            <div class="marquee__track">
+              {[0, 1].map((copy) => (
+                <ul class="marquee__set" aria-hidden={copy === 1 ? 'true' : undefined} role={copy === 0 ? 'list' : undefined}>
+                  {row.map((p) => (
+                    <li class="marquee__item" style={`--ratio: ${p.src.width / p.src.height}`}>
+                      <Image src={p.src} alt={copy === 0 ? p.alt : ''} widths={[320, 640, 960, 1280]} sizes={`${Math.round(Math.min(2, p.src.width / p.src.height) * 360)}px`} loading="lazy" />
+                    </li>
+                  ))}
+                </ul>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  </main>
+
+  <!-- The closing band: a class on a dark layer, carrying the corporate invitation and the footer. -->
+  <div class="closing">
+    <Image class="closing__pic" src={closing.src} alt="" widths={[960, 1600, 1920]} sizes="100vw" />
+    <section id="corporate" class="band band--ink corporate" aria-labelledby="corporate-title">
+      <div class="grid">
+        <div class="rail">
+          <div class="rail__inner">
+            <h2 id="corporate-title" class="head" data-reveal>Corporate training</h2>
+            <p data-reveal style="--i: 1">{nb('Excel, SQL and Power BI for teams, from analysts to managers who read the reports.')}</p>
+          </div>
+        </div>
+        <div class="content">
+          <p class="corporate__statement lead" data-reveal>
+            {nb('For corporate trainings, reach out to me by email. Tell me how many people, which tools, and what the team needs to be able to do.')}
+          </p>
+          <div class="corporate__links" data-reveal style="--i: 1">
+            <a class="corporate__email" href={corporateMail}>{me.email}</a>
+            <div class="corporate__more">
+              <a class="button" href={corporateMail}>Email me about corporate training</a>
+              <a class="link" href={generalMail}>A question about one-on-one training</a>
+              <a class="link" href={me.linkedin} rel="noopener" target="_blank">LinkedIn</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <Footer />
+  </div>
+</Base>
+
+<script>
+  // Prices: naira for learners in Nigeria, dollars elsewhere. The first guess comes from the time zone
+  // (set before the page paints, in the head); the visitor's own choice is remembered.
+  const root = document.documentElement;
+  const options = [...document.querySelectorAll<HTMLButtonElement>('[data-currency-set]')];
+  const showCurrency = (c: string) => {
+    root.dataset.currency = c;
+    options.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.currencySet === c)));
+  };
+  showCurrency(root.dataset.currency === 'ngn' ? 'ngn' : 'usd');
+  options.forEach((b) => b.addEventListener('click', () => {
+    const c = b.dataset.currencySet!;
+    showCurrency(c);
+    try { localStorage.setItem('currency', c); } catch {}
+  }));
+
+  // Courses as tabs: arrow keys move between them, and a link to #excel, #sql or #power-bi opens that one.
+  const tabs = [...document.querySelectorAll<HTMLButtonElement>('[data-tab]')];
+  const panels = [...document.querySelectorAll<HTMLElement>('[data-panel]')];
+  if (tabs.length) {
+    document.querySelector('.courses')?.classList.add('is-tabbed');
+    const select = (id: string, focus = false) => {
+      tabs.forEach((t) => {
+        const on = t.dataset.tab === id;
+        t.setAttribute('aria-selected', String(on));
+        t.tabIndex = on ? 0 : -1;
+        if (on && focus) t.focus();
+      });
+      panels.forEach((p) => {
+        p.dataset.active = String(p.dataset.panel === id);
+        if (p.dataset.panel === id) p.querySelectorAll('[data-reveal]').forEach((el) => el.classList.add('is-in'));
+      });
+    };
+    tabs.forEach((t, i) => {
+      t.addEventListener('click', () => select(t.dataset.tab!));
+      t.addEventListener('keydown', (e) => {
+        const step = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0;
+        if (e.key === 'Home' || e.key === 'End') {
+          e.preventDefault();
+          select(tabs[e.key === 'Home' ? 0 : tabs.length - 1].dataset.tab!, true);
+        } else if (step) {
+          e.preventDefault();
+          select(tabs[(i + step + tabs.length) % tabs.length].dataset.tab!, true);
+        }
+      });
+    });
+    const fromHash = () => {
+      const id = location.hash.slice(1);
+      if (!panels.some((p) => p.dataset.panel === id)) return;
+      select(id);
+      document.getElementById('courses')?.scrollIntoView({ block: 'start' });
+    };
+    // A link to one course scrolls to the section with that course open, not to the hidden panel.
+    document.querySelectorAll<HTMLAnchorElement>('[data-show-course]').forEach((a) => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        select(a.dataset.showCourse!);
+        history.replaceState(null, '', `#${a.dataset.showCourse}`);
+        document.getElementById('courses')?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+      });
+    });
+    addEventListener('hashchange', fromHash);
+    fromHash();
+  }
+
+  // The photographs drift on their own; the button stops and restarts both rows.
+  const marquees = document.querySelector<HTMLElement>('[data-marquees]');
+  const toggle = document.querySelector<HTMLButtonElement>('[data-marquee-toggle]');
+  if (marquees && toggle) {
+    toggle.addEventListener('click', () => {
+      const paused = marquees.classList.toggle('is-paused');
+      toggle.setAttribute('aria-pressed', String(paused));
+      toggle.textContent = paused ? 'Play the photographs' : 'Pause the photographs';
+    });
+  }
+</script>
+
+<style>
+  /* ---------- prices: both currencies without script, the visitor's one with it ---------- */
+  :global(html.js[data-currency='ngn']) .trainings [data-cur='usd'],
+  :global(html.js[data-currency='usd']) .trainings [data-cur='ngn'],
+  :global(html.js[data-currency]) .trainings .price__or { display: none; }
+  .price { white-space: nowrap; }
+
+  /* ---------- head ---------- */
+  .page-head { padding-block: clamp(3rem, 7vh, 5rem) clamp(3rem, 6vw, 5rem); align-items: end; row-gap: clamp(2.5rem, 5vw, 4rem); }
+  .page-head__title { grid-column: 1 / span 6; }
+  .page-head__side { grid-column: 7 / -1; display: grid; gap: 1.25rem; }
+  .page-head__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.75rem; margin-top: 0.5rem; }
+  .lead-photo { grid-column: 1 / -1; }
+  .lead-photo__frame { aspect-ratio: 21 / 9; overflow: hidden; background: var(--surface); }
+  .lead-photo__frame img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 42%; }
+  @media (prefers-reduced-motion: no-preference) {
+    .lead-photo__frame img { animation: drift 24s var(--ease-in-out) infinite alternate; }
+  }
+  @keyframes drift { from { transform: scale(1.06) translateX(1.5%); } to { transform: scale(1.06) translateX(-1.5%); } }
+
+  /* ---------- the packages, compared ---------- */
+  .packages { padding-block: clamp(4rem, 7vw, 6.5rem); }
+  .plans {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: minmax(0, 4fr) repeat(4, minmax(0, 2fr));
+    grid-template-rows: repeat(6, auto);
+    /* the tones bleed a cell's padding into the margins, so the words line up with the page's edges */
+    margin-inline: -1.25rem;
+  }
+  .plans__intro { grid-column: 1; grid-row: 1; display: grid; gap: 1.25rem; align-content: start; padding: 0 2.5rem 2rem 1.25rem; }
+  .plans__labels { grid-column: 1; grid-row: 2 / span 5; display: grid; grid-template-rows: subgrid; }
+  .plans__label { padding: 1.25rem; font-size: var(--step-body); line-height: 1.4; font-weight: 600; }
+  .plans__label:nth-child(even) { background: var(--surface); }
+
+  .plan { grid-row: 1 / span 6; display: grid; grid-template-rows: subgrid; background: transparent; }
+  .plan--featured { background: var(--bg); color: var(--ink); }
+  .plan__head { display: grid; align-content: end; gap: 0.375rem; padding: 1.75rem 1.25rem 2rem; }
+  .plan__name { font-size: clamp(1.5rem, 1rem + 1.2vw, 2.25rem); font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
+  .plan__price { font-size: clamp(1.5rem, 1rem + 1.2vw, 2.25rem); line-height: 1.1; letter-spacing: -0.02em; }
+  .plan__per { display: block; margin-top: 0.375rem; font-size: 1rem; letter-spacing: 0; color: var(--muted); }
+  .plan__note { font-size: var(--step-small); color: var(--muted); }
+  .plan--featured .plan__note { color: #ffffff; font-weight: 600; }
+  .plan__cell { display: grid; align-content: start; gap: 0.625rem; padding: 1.25rem; font-size: 1.0625rem; line-height: 1.5; }
+  .plan__cell--alt { background: var(--surface); }
+  .plan__cell--action { padding-block: 1.75rem; }
+  .plan__cell--action .button { justify-self: start; }
+  .plan__label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .plan__more { justify-self: start; font-size: var(--step-small); }
+
+  .packages__after { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; margin-top: clamp(3rem, 5vw, 4.5rem); row-gap: 1.5rem; }
+  .packages__after-title { grid-column: 1 / span 4; font-size: var(--step-lead); font-weight: 500; }
+  .packages__included { grid-column: 5 / -1; columns: 2; column-gap: var(--gutter); }
+  .packages__included li { break-inside: avoid; padding-block: 0.25rem; }
+  .packages__included li::before { content: ''; display: inline-block; width: 0.5rem; height: 0.5rem; margin-right: 0.75rem; background: var(--accent); vertical-align: 0.15em; }
+  .packages__terms { grid-column: 5 / -1; max-width: 70ch; }
+
+  .currency { display: grid; gap: 0.625rem; margin-top: 0.5rem; }
+  .currency__label { font-size: var(--step-small); color: var(--muted); }
+  .currency__options { display: inline-flex; justify-self: start; background: var(--surface-2); padding: 0.25rem; }
+  .currency__option { min-height: 2.75rem; padding: 0 1rem; font-size: var(--step-small); font-weight: 600; color: var(--ink); transition: background-color var(--t-hover) ease, color var(--t-hover) ease, transform var(--t-press) var(--ease-out); }
+  .currency__option[aria-pressed='true'] { background: var(--ink); color: var(--bg); }
+  .currency__option:active { transform: scale(0.97); }
+  :global(html:not(.js)) .currency { display: none; }
+  @media (hover: hover) and (pointer: fine) {
+    .currency__option[aria-pressed='false']:hover { background: var(--bg); }
+  }
+
+  /* tablet: two packages a row; phone: one */
+  @media (max-width: 60em) {
+    .plans { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; gap: var(--gutter); margin-inline: 0; }
+    .plans__intro { grid-column: 1 / -1; padding: 0 0 1rem; }
+    .plans__labels { display: none; }
+    .plan { grid-row: auto; display: block; background: var(--bg); }
+    .plan:not(.plan--featured) { --bg: #ffffff; --surface: #f4f4f3; }
+    .plan__head { padding: 1.5rem 1.25rem 1.25rem; }
+    .plan__cell { padding: 0.875rem 1.25rem; }
+    .plan__cell--alt { background: transparent; }
+    .plan__label { position: static; width: auto; height: auto; overflow: visible; clip-path: none; white-space: normal; font-size: var(--step-small); color: var(--muted); }
+    .plan__cell--action { padding: 1rem 1.25rem 1.5rem; }
+    .packages__after { grid-template-columns: 1fr; }
+    .packages__after-title, .packages__included, .packages__terms { grid-column: 1; }
+  }
+  @media (max-width: 40em) {
+    .plans { grid-template-columns: 1fr; row-gap: 2.5rem; }
+    .plan__name, .plan__price { font-size: 2rem; }
+    .plan__cell--action .button { justify-self: stretch; }
+    .packages__included { columns: 1; }
+  }
+
+  /* ---------- the complete package, drawn as its three months ---------- */
+  .complete__price { font-size: var(--step-head); letter-spacing: -0.02em; line-height: 1.1; }
+  .complete__price .price { font-weight: 500; }
+  .months { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 0.375rem; row-gap: 0.375rem; }
+  .months__bar, .months__ai { display: flex; align-items: flex-end; padding: 1rem 1.25rem; font-size: var(--step-lead); font-weight: 600; letter-spacing: -0.01em; line-height: 1.1; transform-origin: left center; }
+  .months__bar { grid-row: 1; grid-column: var(--col); min-height: clamp(6rem, 10vw, 9rem); background: var(--ink); color: var(--bg); }
+  .months__ai { grid-row: 2; grid-column: 1 / -1; min-height: 3.75rem; align-items: center; background: var(--accent); color: var(--accent-ink); font-size: var(--step-body); }
+  .months__text { grid-row: 3; grid-column: var(--col); display: grid; gap: 0.5rem; align-content: start; padding: 1.5rem 1.5rem 0 0; }
+  .months__title { font-size: var(--step-body); font-weight: 600; letter-spacing: 0; line-height: 1.35; }
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.js) .months__bar, :global(.js) .months__ai { transform: scaleX(0); transition: transform 700ms var(--ease-out); transition-delay: calc(100ms + var(--i, 0) * 110ms); }
+    :global(.js) .months__bar span, :global(.js) .months__ai span { opacity: 0; transition: opacity 400ms ease; transition-delay: calc(350ms + var(--i, 0) * 110ms); }
+    .months:global(.is-in) .months__bar, .months:global(.is-in) .months__ai { transform: none; }
+    .months:global(.is-in) .months__bar span, .months:global(.is-in) .months__ai span { opacity: 1; }
+  }
+  .complete__more { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2.5rem var(--gutter); margin-top: clamp(3rem, 5vw, 4.5rem); }
+  .complete__subhead { font-size: var(--step-lead); font-weight: 500; margin-bottom: 0.75rem; }
+  .complete__list li { padding-block: 0.2rem; }
+  .complete__list li::before { content: ''; display: inline-block; width: 0.5rem; height: 0.5rem; margin-right: 0.75rem; background: var(--accent); vertical-align: 0.15em; }
+  @media (max-width: 40em) {
+    .months { grid-template-columns: 1fr; }
+    /* on a phone each month's bar sits over its own words, and AI closes the column */
+    .months__bar { grid-column: 1; grid-row: var(--row); min-height: 4.5rem; }
+    .months__text { grid-column: 1; grid-row: var(--row); padding: 1rem 0 1.5rem; }
+    .months__ai { grid-row: 7; }
+    .complete__more { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- the courses ---------- */
+  .tabs { display: none; }
+  .courses.is-tabbed .tabs { display: inline-flex; justify-self: start; background: var(--surface-2); padding: 0.25rem; margin-top: 0.5rem; }
+  .tabs__tab { min-height: 3rem; padding: 0 1.25rem; font-weight: 600; font-size: var(--step-body); transition: background-color var(--t-hover) ease, color var(--t-hover) ease, transform var(--t-press) var(--ease-out); }
+  .tabs__tab[aria-selected='true'] { background: var(--ink); color: var(--bg); }
+  .tabs__tab:active { transform: scale(0.97); }
+  @media (hover: hover) and (pointer: fine) {
+    .tabs__tab[aria-selected='false']:hover { background: var(--bg); }
+  }
+  .course + .course { margin-top: clamp(4rem, 7vw, 6rem); }
+  .courses.is-tabbed .course + .course { margin-top: 0; }
+  .courses.is-tabbed .course[data-active='false'] { display: none; }
+  .courses.is-tabbed .course[data-active='true'] { animation: panel-in 500ms var(--ease-out); }
+  @keyframes panel-in { from { opacity: 0; transform: translateY(10px); } }
+  .course__head { display: grid; gap: 0.75rem; max-width: 48rem; }
+  .course__name { font-size: var(--step-head); }
+  .course__facts { font-weight: 600; }
+  .course__modules {
+    list-style: decimal;
+    columns: 2;
+    column-gap: calc(var(--gutter) * 2.5);
+    margin-top: clamp(2rem, 4vw, 3rem);
+    padding-left: 1.5rem;
+  }
+  .course__modules li { break-inside: avoid; padding: 0 0 1.375rem 0.375rem; }
+  .course__modules li::marker { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .course__module { display: block; font-weight: 600; }
+  .course__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.25rem 2rem; margin-top: 1.5rem; padding: 1.5rem; background: var(--surface); }
+  .course__foot p { max-width: 44ch; }
+  @media (max-width: 48em) {
+    .course__modules { columns: 1; }
+  }
+  @media (max-width: 40em) {
+    .courses.is-tabbed .tabs { display: flex; justify-self: stretch; }
+    .tabs__tab { flex: 1; padding: 0 0.5rem; }
+    .course__foot .button { width: 100%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .courses.is-tabbed .course[data-active='true'] { animation: none; }
+  }
+
+  /* ---------- in the classroom ---------- */
+  .classroom { padding-bottom: clamp(5rem, 8vw, 7rem); }
+  .classroom__head { align-items: start; row-gap: 2rem; }
+  .classroom__intro { grid-column: 1 / span 4; display: grid; gap: 1.25rem; justify-items: start; }
+  .classroom__pause { font-size: var(--step-small); font-weight: 600; min-height: 2.75rem; }
+  .record { grid-column: 5 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem var(--gutter); }
+  .record__item { display: grid; gap: 0.25rem; align-content: start; }
+  .record__point { margin-top: 0.375rem; }
+
+  .marquees { display: grid; gap: 0.75rem; margin-top: clamp(3rem, 5vw, 4.5rem); --row: clamp(12rem, 22vw, 22.5rem); }
+  .marquee { overflow: hidden; }
+  .marquee__track { display: flex; width: max-content; }
+  .marquee__set { display: flex; gap: 0.75rem; padding-right: 0.75rem; }
+  .marquee__item { flex: none; height: var(--row); aspect-ratio: var(--ratio); overflow: hidden; background: var(--surface); }
+  .marquee__item img { width: 100%; height: 100%; object-fit: cover; transition: transform 700ms var(--ease-soft); }
+  @media (prefers-reduced-motion: no-preference) {
+    .marquee__track { animation: marquee 110s linear infinite; }
+    .marquee--reverse .marquee__track { animation-direction: reverse; animation-duration: 120s; }
+    .marquees.is-paused .marquee__track { animation-play-state: paused; }
+    @media (hover: hover) and (pointer: fine) {
+      .marquee:hover .marquee__track { animation-play-state: paused; }
+      .marquee__item:hover img { transform: scale(1.04); }
+    }
+  }
+  @keyframes marquee { to { transform: translateX(-50%); } }
+  /* without motion: each row is a strip the visitor scrolls sideways themselves */
+  @media (prefers-reduced-motion: reduce) {
+    .marquee { overflow-x: auto; scroll-snap-type: x proximity; }
+    .marquee__set[aria-hidden='true'] { display: none; }
+    .marquee__item { scroll-snap-align: start; }
+    .classroom__pause { display: none; }
+  }
+  @media (max-width: 60em) {
+    .classroom__intro, .record { grid-column: 1 / -1; }
+  }
+  @media (max-width: 40em) {
+    .record { grid-template-columns: 1fr; gap: 1.5rem; }
+  }
+
+  /* ---------- closing band: corporate training and the footer over a class photograph ---------- */
+  .closing { position: relative; isolation: isolate; overflow: hidden; background: #0a0a0a; }
+  .closing__pic { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; object-position: 50% 40%; }
+  .closing::before { content: ''; position: absolute; inset: 0; z-index: -1; background: rgba(10, 10, 10, 0.78); }
+  .closing :global(.band--ink) { --muted: #d6d6d6; background: transparent; }
+  .corporate { padding-bottom: 2rem; }
+  .corporate .rail__inner { position: static; }
+  .corporate__statement { max-width: 34ch; }
+  .corporate__links { display: grid; gap: 2rem; margin-top: 3rem; justify-items: start; }
+  .corporate__email {
+    font-size: var(--step-head);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    text-decoration: underline;
+    text-decoration-thickness: 0.04em;
+    text-underline-offset: 0.18em;
+    text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+    overflow-wrap: anywhere;
+    transition: text-decoration-color var(--t-hover) ease;
+  }
+  .corporate__more { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.75rem; }
+  @media (hover: hover) and (pointer: fine) {
+    .corporate__email:hover { text-decoration-color: currentColor; }
+  }
+
+  @media (max-width: 60em) {
+    .page-head__title, .page-head__side { grid-column: 1 / -1; }
+    .lead-photo__frame { aspect-ratio: 3 / 2; }
+  }
+  @media (max-width: 40em) {
+    .lead-photo__frame { aspect-ratio: 4 / 3; }
+  }
+</style>

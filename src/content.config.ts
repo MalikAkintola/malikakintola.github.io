@@ -95,10 +95,32 @@ const projects = defineCollection({
     }),
 });
 
+// src/content/trainings.yaml: the training packages on /trainings/.
+const trainings = defineCollection({
+  loader: file('src/content/trainings.yaml'),
+  schema: z.object({
+    name: z.string(),
+    short: z.string().max(12),
+    kind: z.enum(['programme', 'course']),
+    order: z.number(),
+    summary: z.string().max(160),
+    learn: z.string().max(110),
+    ngn: z.number().positive(),
+    usd: z.number().positive(),
+    per: z.enum(['month', 'hour']),
+    length: z.string(),
+    hoursPerWeek: z.number().positive().optional(),
+    months: z.array(z.object({ tool: z.string(), text: z.string() })).optional(),
+    ai: z.string().optional(),
+    modules: z.array(z.object({ title: z.string(), text: z.string() })).optional(),
+    included: z.array(z.string()).min(1),
+  }),
+});
+
 // Medium articles, read from the Medium feed at build time (see src/lib/medium.ts).
 const writing = defineCollection({
   loader: mediumFeed('malikola223'),
   schema: z.object({ title: z.string(), url: z.url(), date: z.coerce.date(), excerpt: z.string().optional() }),
 });
 
-export const collections = { profile, experience, certifications, projects, writing };
+export const collections = { profile, experience, certifications, projects, trainings, writing };

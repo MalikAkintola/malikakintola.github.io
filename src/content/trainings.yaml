@@ -1,0 +1,133 @@
+# The training packages on /trainings/. Change the text after a colon and keep the indentation.
+# Prices are plain numbers, without commas or currency signs: ngn is the naira price for learners in
+# Nigeria, usd the dollar price for learners elsewhere. The page works out the rest (a 2-hour session,
+# half a month, the saving against the hourly rate).
+
+- id: complete
+  name: Complete Data Analysis Package
+  short: Complete
+  kind: programme
+  order: 1
+  summary: Excel, SQL and Power BI in three months, with AI for productive analysis throughout.
+  learn: Excel, then SQL, then Power BI, one month each, with AI throughout.
+  ngn: 180000
+  usd: 120
+  per: month
+  length: About 3 months
+  hoursPerWeek: 4
+  months:
+    - tool: Excel
+      text: Cleaning data, formulas and lookups, PivotTables, Power Query and a one-page dashboard.
+    - tool: SQL
+      text: Querying and filtering, aggregation, joins, CTEs and window functions in PostgreSQL.
+    - tool: Power BI
+      text: Power Query, data modelling, DAX, report design, interactivity and publishing.
+  ai: Every module shows how to use AI assistants to write formulas, SQL and DAX faster, debug, explore data and draft insights, and how to check what AI gives you.
+  included:
+    - Sessions paced to your level and goals
+    - Practice datasets and exercises
+    - Assignments reviewed with feedback
+    - Support between sessions
+    - A portfolio-ready capstone project
+
+- id: excel
+  name: Excel for Data Analysis
+  short: Excel
+  kind: course
+  order: 2
+  summary: From messy spreadsheets to clean data, sharp analysis and simple dashboards, with AI built into the workflow.
+  learn: Cleaning data, formulas, lookups, PivotTables, Power Query and dashboards.
+  ngn: 15000
+  usd: 10
+  per: hour
+  length: About 4 weeks
+  modules:
+    - title: Excel for analysts
+      text: Navigating fast, tables, data types, formatting and good worksheet structure.
+    - title: Cleaning data
+      text: Text and date functions, removing duplicates, Flash Fill and data validation.
+    - title: Formulas and logic
+      text: IF and IFS, SUMIFS, COUNTIFS, AVERAGEIFS and dynamic arrays like FILTER and UNIQUE.
+    - title: Lookups
+      text: XLOOKUP, INDEX and MATCH, and combining data from several sheets.
+    - title: PivotTables
+      text: Summarising data, grouping, calculated fields, slicers and PivotCharts.
+    - title: Power Query
+      text: Importing, reshaping and refreshing data automatically, without manual rework.
+    - title: Charts and dashboards
+      text: Choosing the right chart and building a clean, one-page Excel dashboard.
+    - title: AI for Excel and capstone
+      text: Using AI to write and explain formulas and speed up analysis, then an end-to-end project.
+  included:
+    - Sessions paced to your level and goals
+    - Practice datasets and exercises
+    - Feedback on your workbooks
+    - Support between sessions
+
+- id: sql
+  name: SQL for Data Analysis
+  short: SQL
+  kind: course
+  order: 3
+  summary: Query, combine and summarise data straight from the database, with AI built into the workflow.
+  learn: Queries, filtering, aggregation, joins, CTEs and window functions in PostgreSQL.
+  ngn: 15000
+  usd: 10
+  per: hour
+  length: About 4 weeks
+  modules:
+    - title: Databases and SELECT
+      text: How relational databases work, setting up PostgreSQL, and your first queries.
+    - title: Filtering and sorting
+      text: WHERE, IN, BETWEEN, LIKE, handling NULLs and ORDER BY.
+    - title: Aggregation
+      text: COUNT, SUM, AVG, GROUP BY and HAVING to summarise data.
+    - title: Joins
+      text: INNER, LEFT and FULL joins, and combining tables correctly without duplicates.
+    - title: Transforming data
+      text: CASE, string and date functions, and type conversions for clean output.
+    - title: Subqueries and CTEs
+      text: Breaking complex questions into readable, step-by-step queries.
+    - title: Window functions
+      text: Rankings, running totals and period-over-period comparisons with ROW_NUMBER, RANK and LAG.
+    - title: AI for SQL and capstone
+      text: Using AI to write, explain and debug queries safely, then an end-to-end analysis project.
+  included:
+    - Sessions paced to your level and goals
+    - Practice databases and exercises
+    - Feedback on your queries
+    - Support between sessions
+
+- id: power-bi
+  name: Power BI for Data Analysis
+  short: Power BI
+  kind: course
+  order: 4
+  summary: From raw data to clear, interactive dashboards, with AI built into the workflow.
+  learn: Power Query, data modelling, DAX, report design and publishing.
+  ngn: 15000
+  usd: 10
+  per: hour
+  length: About 6 weeks
+  modules:
+    - title: Getting and shaping data
+      text: Connecting to Excel, CSV and databases, then cleaning and transforming with Power Query.
+    - title: Data modelling
+      text: Star schema, fact and dimension tables, relationships and a proper date table.
+    - title: DAX essentials
+      text: Measures and calculated columns, CALCULATE and filter context, time intelligence.
+    - title: Visuals and report design
+      text: Choosing the right chart, layout and colour, and building dashboards that tell a story.
+    - title: Interactivity
+      text: Slicers, drill-down, drill-through, tooltips and bookmarks.
+    - title: Publishing and sharing
+      text: Power BI Service, workspaces, scheduled refresh and sharing reports.
+    - title: AI for Power BI
+      text: Using AI to write and debug DAX, speed up modelling and draft insights, and how to verify AI output.
+    - title: Capstone project
+      text: An end-to-end dashboard on a real dataset, ready for your portfolio.
+  included:
+    - Sessions paced to your level and goals
+    - Practice datasets and exercises
+    - Feedback on your reports and DAX
+    - Support between sessions
