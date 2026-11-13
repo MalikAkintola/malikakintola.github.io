@@ -3,6 +3,10 @@
 import { getEntry } from 'astro:content';
 const me = (await getEntry('profile', 'me'))!.data;
 const path = Astro.url.pathname;
+// On the trainings page the button writes to the trainings address; everywhere else, to recruit.
+const onTrainings = path.startsWith('/trainings');
+const email = onTrainings ? me.trainingsEmail : me.recruitEmail;
+const subject = onTrainings ? 'Training' : 'Hello%20Malik';
 ---
 <nav class="nav" aria-label="Main">
   <a class="nav__mark" href="/">{me.name}</a>
@@ -13,7 +17,7 @@ const path = Astro.url.pathname;
     <a class="link" href={me.linkedin} rel="noopener" target="_blank">LinkedIn</a>
     <a class="link" href="/resume/" aria-current={path.startsWith('/resume') ? 'page' : undefined}>Résumé</a>
   </div>
-  <a class="button nav__action" href={`mailto:${me.email}?subject=Hello%20Malik`}>Email me</a>
+  <a class="button nav__action" href={`mailto:${email}?subject=${subject}`}>Email me</a>
 </nav>
 
 <style>

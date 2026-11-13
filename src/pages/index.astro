@@ -31,7 +31,7 @@ const facts = [
   title={`${me.name}, ${me.role.toLowerCase()} in Lagos`}
   description={`${me.name} is an analytics engineer in Lagos who builds data pipelines and Power BI reporting. Microsoft certified on Fabric. Case studies, experience and résumé.`}
 >
-  <Hero name={me.name} role={me.role} tagline={me.tagline} email={me.email} linkedin={me.linkedin} />
+  <Hero name={me.name} role={me.role} tagline={me.tagline} email={me.recruitEmail} linkedin={me.linkedin} />
   <main id="main">
     <Projects projects={projects.filter((p) => p.data.featured)} total={projects.length} />
     <About bio={me.bio} facts={facts} certifications={certifications} />
@@ -43,7 +43,7 @@ const facts = [
   <!-- The closing band: a real picture under a dark, part-transparent layer, shared by contact and footer. -->
   <div class="closing">
     <Image class="closing__pic" src={closingPicture} alt="" widths={[960, 1600, 2400]} sizes="100vw" />
-    <Contact email={me.email} linkedin={me.linkedin} location={me.location} availability={me.availability} />
+    <Contact email={me.recruitEmail} linkedin={me.linkedin} location={me.location} availability={me.availability} />
     <Footer credit="Photograph: IBM punched-card storage, U.S. National Archives, public domain." />
   </div>
 </Base>

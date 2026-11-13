@@ -5,7 +5,11 @@
   role: Analytics Engineer
   location: Lagos, Nigeria
   availability: Available to work across time zones.
-  email: malikola223@gmail.com
+  # Your personal address. It is printed only on the résumé.
+  resumeEmail: malikola223@gmail.com
+  # The addresses the rest of the site shows: work enquiries, and the trainings page.
+  recruitEmail: recruit@malikakintola.com
+  trainingsEmail: trainings@malikakintola.com
   # To print a phone number on the résumé, add a line `phone: "..."` here and set this to true.
   # Everything in this file is public on GitHub, so the number is public as soon as it is saved here.
   showPhoneOnResume: false

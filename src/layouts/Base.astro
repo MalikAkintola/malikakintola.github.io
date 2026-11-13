@@ -32,7 +32,7 @@ const structuredData = {
       '@id': `${Astro.site?.href}#person`,
       name: me.name,
       jobTitle: me.role,
-      email: `mailto:${me.email}`,
+      email: `mailto:${me.recruitEmail}`,
       url: Astro.site?.href,
       image: new URL(photo.src, Astro.site).href,
       address: { '@type': 'PostalAddress', addressLocality: 'Lagos', addressCountry: 'NG' },

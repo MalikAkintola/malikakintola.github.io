@@ -39,7 +39,7 @@ volunteer.sort(byRecent);
         <h2 class="resume__name">{me.name}</h2>
         <p class="resume__role">{me.role}</p>
         <p class="resume__contact">
-          <a href={`mailto:${me.email}`}>{me.email}</a>
+          <a href={`mailto:${me.resumeEmail}`}>{me.resumeEmail}</a>
           {me.showPhoneOnResume && me.phone && <span>{me.phone}</span>}
           <a href={me.linkedin}>{strip(me.linkedin)}</a>
           <a href={me.github}>{strip(me.github)}</a>

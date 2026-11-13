@@ -2,7 +2,7 @@
 // Trainings. The four packages from src/content/trainings.yaml, compared in one large table; the
 // complete package drawn as its three months; each course's eight modules; photographs of classes in
 // two rows that drift in opposite directions; and corporate training by email in the closing band.
-// Prices show in naira for learners in Nigeria and in dollars elsewhere; the visitor can switch.
+// Prices show in naira or in dollars, whichever the visitor picks.
 import { getCollection, getEntry } from 'astro:content';
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
@@ -11,17 +11,25 @@ import SiteNav from '../components/SiteNav.astro';
 import Footer from '../components/Footer.astro';
 import { span } from '../lib/dates';
 import { nb } from '../lib/text';
+import excelLogo from '../assets/logos/excel.png';
+import postgresLogo from '../assets/logos/postgresql.png';
+import powerBiLogo from '../assets/logos/power-bi.png';
 
 const me = (await getEntry('profile', 'me'))!.data;
 const packages = (await getCollection('trainings')).sort((a, b) => a.data.order - b.data.order).map((p) => ({ id: p.id, ...p.data }));
 const programme = packages.find((p) => p.kind === 'programme')!;
 const courses = packages.filter((p) => p.kind === 'course');
-const hourly = courses[0];
 const fromNgn = Math.min(...courses.map((c) => c.ngn));
 const fromUsd = Math.min(...courses.map((c) => c.usd));
-// The complete package against booking the same hours one by one.
+// Hours of live one-on-one time in a month of the complete package.
 const monthHours = (programme.hoursPerWeek ?? 4) * 4;
-const saving = Math.round((1 - programme.ngn / (hourly.ngn * monthHours)) * 100);
+// The logo in each month's box, by the tool's name in trainings.yaml. Excel's logo is white on its own
+// green, so its box takes that green; the other two are on white, so their boxes are light.
+const logos: Record<string, { src: ImageMetadata; tone: 'excel' | 'light' }> = {
+  Excel: { src: excelLogo, tone: 'excel' },
+  SQL: { src: postgresLogo, tone: 'light' },
+  'Power BI': { src: powerBiLogo, tone: 'light' },
+};
 
 // The teaching roles from experience.yaml, as the record beside the photographs.
 const teachingIds = ['hagital', 'career-expo', 'investment-society', 'dsn'];
@@ -56,18 +64,18 @@ const rowA = photos;
 const rowB = [...photos.slice(Math.ceil(photos.length / 2)), ...photos.slice(0, Math.ceil(photos.length / 2))].reverse();
 
 const ngn = (n: number) => `₦${n.toLocaleString('en-US')}`;
-const usd = (n: number) => `$${n.toLocaleString('en-US')}`;
+const usd = (n: number) => `$${n.toLocaleString('en-US', { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 })}`;
 const per = (p: (typeof packages)[number]) => (p.per === 'month' ? 'a month' : 'an hour');
 
 const mail = (subject: string, body: string) =>
-  `mailto:${me.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  `mailto:${me.trainingsEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 const bookingMail = (name: string) =>
-  mail(`Training: ${name}`, `Hello Malik,\n\nI would like to book the ${name}.\n\nWhere I am based:\nWhat I can do so far:\nWhat I want to be able to do:\nWhen I am free for sessions:\n\nThank you.`);
+  mail(`Training: ${name}`, `Hello Malik,\n\nI would like to book the ${name}.\n\nI will pay in (naira or dollars):\nWhat I can do so far:\nWhat I want to be able to do:\nWhen I am free for sessions:\n\nThank you.`);
 const corporateMail = mail(
   'Corporate training',
   `Hello Malik,\n\nWe would like training for our team.\n\nCompany:\nNumber of people:\nTools (Excel, SQL, Power BI):\nWhat the team needs to be able to do:\nPreferred dates and format:\n\nThank you.`,
 );
-const generalMail = mail('Training', 'Hello Malik,\n\nI would like to learn data analysis with you.\n\nWhere I am based:\nWhat I want to learn:\n\nThank you.');
+const generalMail = mail('Training', 'Hello Malik,\n\nI would like to learn data analysis with you.\n\nI will pay in (naira or dollars):\nWhat I want to learn:\n\nThank you.');
 
 const anchorOf = (p: (typeof packages)[number]) => (p.kind === 'programme' ? '#complete' : `#${p.id}`);
 const rows = ['What you learn', 'Typical length', 'Sessions', 'Paying'] as const;
@@ -122,10 +130,10 @@ const rows = ['What you learn', 'Typical length', 'Sessions', 'Paying'] as const
               {nb('All three tools in one three-month programme, or one tool at a time, booked by the hour. Every session is live, online and one-on-one.')}
             </p>
             <div class="currency" role="group" aria-labelledby="currency-label" data-reveal style="--i: 2">
-              <span id="currency-label" class="currency__label">Show prices for learners</span>
+              <span id="currency-label" class="currency__label">Show prices in</span>
               <div class="currency__options">
-                <button type="button" class="currency__option" data-currency-set="ngn" aria-pressed="false">In Nigeria, ₦</button>
-                <button type="button" class="currency__option" data-currency-set="usd" aria-pressed="false">Elsewhere, $</button>
+                <button type="button" class="currency__option" data-currency-set="ngn" aria-pressed="false">₦ Naira</button>
+                <button type="button" class="currency__option" data-currency-set="usd" aria-pressed="false">$ Dollar</button>
               </div>
             </div>
           </div>
@@ -142,9 +150,7 @@ const rows = ['What you learn', 'Typical length', 'Sessions', 'Paying'] as const
                 <p class="plan__price nums">
                   <span class="price"><span data-cur="ngn">{ngn(p.ngn)}</span><span class="price__or"> or </span><span data-cur="usd">{usd(p.usd)}</span></span>
                   <span class="plan__per">{per(p)}</span>
-                </p>
-                {p.kind === 'programme' && <p class="plan__note">{saving}% below the hourly rate</p>}
-              </div>
+                </p>              </div>
               <div class="plan__cell">
                 <span class="plan__label">What you learn</span>
                 <p>{nb(p.learn)}</p>
@@ -188,8 +194,8 @@ const rows = ['What you learn', 'Typical length', 'Sessions', 'Paying'] as const
             <li>A module on using AI well</li>
           </ul>
           <p class="packages__terms small" data-reveal style="--i: 2">
-            All sessions are online, at times agreed in advance. Payment is made before sessions begin. Naira
-            prices are for learners in Nigeria, dollar prices for learners elsewhere.
+            All sessions are online, at times agreed in advance. Payment is made before sessions begin, in naira
+            or in dollars, whichever you prefer.
           </p>
         </div>
       </div>
@@ -213,9 +219,16 @@ const rows = ['What you learn', 'Typical length', 'Sessions', 'Paying'] as const
 
         <div class="content">
           <div class="months" data-reveal>
-            {programme.months?.map((m, i) => (
-              <div class="months__bar" aria-hidden="true" style={`--col: ${i + 1}; --row: ${i * 2 + 1}; --i: ${i}`}><span>{m.tool}</span></div>
-            ))}
+            {programme.months?.map((m, i) => {
+              const logo = logos[m.tool];
+              return (
+                <div class:list={['months__bar', logo && `months__bar--${logo.tone}`]} aria-hidden="true" style={`--col: ${i + 1}; --row: ${i * 2 + 1}; --i: ${i}`}>
+                  {logo
+                    ? <Image class="months__logo" src={logo.src} alt="" widths={[240, 480, 720]} sizes="(max-width: 40em) 60vw, 16rem" />
+                    : <span>{m.tool}</span>}
+                </div>
+              );
+            })}
             <div class="months__ai" aria-hidden="true" style={`--i: ${programme.months?.length ?? 3}`}><span>AI, in every module</span></div>
             {programme.months?.map((m, i) => (
               <div class="months__text" style={`--col: ${i + 1}; --row: ${i * 2 + 2}`}>
@@ -338,7 +351,7 @@ const rows = ['What you learn', 'Typical length', 'Sessions', 'Paying'] as const
             {nb('For corporate trainings, reach out to me by email. Tell me how many people, which tools, and what the team needs to be able to do.')}
           </p>
           <div class="corporate__links" data-reveal style="--i: 1">
-            <a class="corporate__email" href={corporateMail}>{me.email}</a>
+            <a class="corporate__email" href={corporateMail}>{me.trainingsEmail}</a>
             <div class="corporate__more">
               <a class="button" href={corporateMail}>Email me about corporate training</a>
               <a class="link" href={generalMail}>A question about one-on-one training</a>
@@ -353,8 +366,8 @@ const rows = ['What you learn', 'Typical length', 'Sessions', 'Paying'] as const
 </Base>
 
 <script>
-  // Prices: naira for learners in Nigeria, dollars elsewhere. The first guess comes from the time zone
-  // (set before the page paints, in the head); the visitor's own choice is remembered.
+  // Prices in naira or dollars. Until the visitor picks, the page starts in naira for a Lagos time zone and
+  // in dollars otherwise (set before it paints, in the head); a pick is remembered.
   const root = document.documentElement;
   const options = [...document.querySelectorAll<HTMLButtonElement>('[data-currency-set]')];
   const showCurrency = (c: string) => {
@@ -470,8 +483,6 @@ const rows = ['What you learn', 'Typical length', 'Sessions', 'Paying'] as const
   .plan__name { font-size: clamp(1.5rem, 1rem + 1.2vw, 2.25rem); font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
   .plan__price { font-size: clamp(1.5rem, 1rem + 1.2vw, 2.25rem); line-height: 1.1; letter-spacing: -0.02em; }
   .plan__per { display: block; margin-top: 0.375rem; font-size: 1rem; letter-spacing: 0; color: var(--muted); }
-  .plan__note { font-size: var(--step-small); color: var(--muted); }
-  .plan--featured .plan__note { color: #ffffff; font-weight: 600; }
   .plan__cell { display: grid; align-content: start; gap: 0.625rem; padding: 1.25rem; font-size: 1.0625rem; line-height: 1.5; }
   .plan__cell--alt { background: var(--surface); }
   .plan__cell--action { padding-block: 1.75rem; }
@@ -525,6 +536,12 @@ const rows = ['What you learn', 'Typical length', 'Sessions', 'Paying'] as const
   .months { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 0.375rem; row-gap: 0.375rem; }
   .months__bar, .months__ai { display: flex; align-items: flex-end; padding: 1rem 1.25rem; font-size: var(--step-lead); font-weight: 600; letter-spacing: -0.01em; line-height: 1.1; transform-origin: left center; }
   .months__bar { grid-row: 1; grid-column: var(--col); min-height: clamp(6rem, 10vw, 9rem); background: var(--ink); color: var(--bg); }
+  .months__bar--excel, .months__bar--light { justify-content: center; align-items: center; }
+  .months__bar--excel { background: #008739; }
+  .months__bar--light { background: var(--surface); }
+  .months__logo { width: auto; height: auto; max-width: min(78%, 15rem); max-height: clamp(2.5rem, 4.5vw, 4.25rem); object-fit: contain; }
+  /* the white around the PostgreSQL and Power BI logos takes on the box's own tone */
+  .months__bar--light .months__logo { mix-blend-mode: multiply; max-height: clamp(3rem, 6vw, 5.5rem); }
   .months__ai { grid-row: 2; grid-column: 1 / -1; min-height: 3.75rem; align-items: center; background: var(--accent); color: var(--accent-ink); font-size: var(--step-body); }
   .months__text { grid-row: 3; grid-column: var(--col); display: grid; gap: 0.5rem; align-content: start; padding: 1.5rem 1.5rem 0 0; }
   .months__title { font-size: var(--step-body); font-weight: 600; letter-spacing: 0; line-height: 1.35; }
@@ -533,6 +550,9 @@ const rows = ['What you learn', 'Typical length', 'Sessions', 'Paying'] as const
     :global(.js) .months__bar span, :global(.js) .months__ai span { opacity: 0; transition: opacity 400ms ease; transition-delay: calc(350ms + var(--i, 0) * 110ms); }
     .months:global(.is-in) .months__bar, .months:global(.is-in) .months__ai { transform: none; }
     .months:global(.is-in) .months__bar span, .months:global(.is-in) .months__ai span { opacity: 1; }
+    /* each logo appears once its box has finished opening, so it is never seen squeezed */
+    :global(.js) .months__logo { opacity: 0; transition: opacity 450ms ease; transition-delay: calc(650ms + var(--i, 0) * 110ms); }
+    .months:global(.is-in) .months__logo { opacity: 1; }
   }
   .complete__more { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2.5rem var(--gutter); margin-top: clamp(3rem, 5vw, 4.5rem); }
   .complete__subhead { font-size: var(--step-lead); font-weight: 500; margin-bottom: 0.75rem; }

@@ -1,6 +1,6 @@
 # The training packages on /trainings/. Change the text after a colon and keep the indentation.
-# Prices are plain numbers, without commas or currency signs: ngn is the naira price for learners in
-# Nigeria, usd the dollar price for learners elsewhere. The page works out the rest (a 2-hour session,
+# Prices are plain numbers, without commas or currency signs: ngn is the naira price, usd the dollar
+# price, and visitors choose which to see. The page works out the rest (a 2-hour session,
 # half a month, the saving against the hourly rate).
 
 - id: complete
@@ -10,8 +10,8 @@
   order: 1
   summary: Excel, SQL and Power BI in three months, with AI for productive analysis throughout.
   learn: Excel, then SQL, then Power BI, one month each, with AI throughout.
-  ngn: 180000
-  usd: 120
+  ngn: 200000
+  usd: 135
   per: month
   length: About 3 months
   hoursPerWeek: 4
